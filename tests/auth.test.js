@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../server.js';
+import { app, server } from '../server.js';
 
 describe('Auth Routes', () => {
     let token;
@@ -30,5 +30,33 @@ describe('Auth Routes', () => {
         token = res.body.token;
         expect(res.statusCode).toBe(200);
         expect(token).toBeDefined();
+    });
+
+    test('Doit se déconnecter et invalider le token', async () => {
+        const res = await request(app)
+            .post('/api/auth/logout')
+            .set('Authorization', `Bearer ${token}`);
+
+        console.log("Logout Response:", res.body); // 🔍 Debug
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.message).toBe('Déconnexion réussie');
+    });
+
+    test('Ne doit plus accéder aux routes protégées après déconnexion', async () => {
+        const res = await request(app)
+            .get('/api/borrow')
+            .set('Authorization', `Bearer ${token}`);
+    
+        console.log("Access after Logout Response:", res.body); // 🔍 Debug
+    
+        expect(res.statusCode).toBe(401);
+        expect(res.body.message).toBe('Token expiré ou révoqué');
+    });    
+
+    afterAll(async () => {
+        if (server && server.close) {
+            server.close();
+        }
     });
 });

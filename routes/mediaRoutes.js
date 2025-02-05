@@ -6,7 +6,7 @@ import {
     updateMedia,
     deleteMedia
 } from '../controllers/mediaController.js';
-import { protect, adminOnly } from '../middleware/authMiddleware.js';
+import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
 
 
 const router = express.Router();
@@ -57,7 +57,7 @@ const router = express.Router();
  *       400:
  *         description: Erreur dans les données fournies
  */
-router.post('/', protect, adminOnly, createMedia);
+router.post('/', protect, authorizeRoles('admin'), createMedia);
 
 /**
  * @swagger
@@ -126,7 +126,7 @@ router.get('/:id', getMediaById);
  *       404:
  *         description: Média non trouvé
  */
-router.put('/:id', protect, adminOnly, updateMedia);
+router.put('/:id', protect, authorizeRoles('admin'), updateMedia);
 
 /**
  * @swagger
@@ -149,6 +149,6 @@ router.put('/:id', protect, adminOnly, updateMedia);
  *       404:
  *         description: Média non trouvé
  */
-router.delete('/:id', protect, adminOnly, deleteMedia);
+router.delete('/:id', protect, authorizeRoles('admin'), deleteMedia);
 
 export default router;

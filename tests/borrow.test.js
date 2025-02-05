@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../server.js';
+import { app, server } from '../server.js';
 
 describe('Borrow Routes', () => {
     let userToken;
@@ -43,9 +43,36 @@ describe('Borrow Routes', () => {
         const res = await request(app)
             .put(`/api/borrow/${borrowId}/return`)
             .set('Authorization', `Bearer ${userToken}`);
-            
+
         console.log("Return Response:", res.body); // 🔍 Debug
 
         expect(res.statusCode).toBe(200);
+    });
+
+    test('Doit se déconnecter et invalider le token', async () => {
+        const res = await request(app)
+            .post('/api/auth/logout')
+            .set('Authorization', `Bearer ${userToken}`);
+
+        expect(res.statusCode).toBe(200);
+    });
+
+    test('Ne doit plus pouvoir emprunter un média après déconnexion', async () => {
+        const res = await request(app)
+            .post('/api/borrow')
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({
+                user: '67a34674e1fc0ef2b5b5e74d',
+                media: mediaId
+            });
+
+        expect(res.statusCode).toBe(401);
+        expect(res.body.message).toBe('Token expiré ou révoqué');
+    });
+
+    afterAll(async () => {
+        if (server && server.close) {
+            server.close();
+        }
     });
 });

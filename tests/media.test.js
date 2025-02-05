@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../server.js';
+import { app, server } from '../server.js';
 
 describe('Media Routes', () => {
     let token;
@@ -39,5 +39,34 @@ describe('Media Routes', () => {
         const res = await request(app).get('/api/media');
         expect(res.statusCode).toBe(200);
         expect(Array.isArray(res.body)).toBe(true);
+    });
+
+    test('Doit se déconnecter et invalider le token', async () => {
+        const res = await request(app)
+            .post('/api/auth/logout')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(res.statusCode).toBe(200);
+    });
+
+    test('Ne doit plus pouvoir ajouter un média après déconnexion', async () => {
+        const res = await request(app)
+            .post('/api/media')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                title: 'Another Movie',
+                type: 'movie',
+                author: 'Director',
+                year: 2020
+            });
+
+        expect(res.statusCode).toBe(401);
+        expect(res.body.message).toBe('Token expiré ou révoqué');
+    });
+
+    afterAll(async () => {
+        if (server && server.close) {
+            server.close();
+        }
     });
 });

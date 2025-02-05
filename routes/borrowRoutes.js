@@ -5,7 +5,7 @@ import {
     getUserBorrows,
     getAllBorrows
 } from '../controllers/borrowController.js';
-import { protect, adminOnly } from '../middleware/authMiddleware.js';
+import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -104,6 +104,6 @@ router.get('/user/:userId', protect, getUserBorrows);
  *       200:
  *         description: Liste de tous les emprunts
  */
-router.get('/', protect, adminOnly, getAllBorrows);
+router.get('/', protect, authorizeRoles('admin'), getAllBorrows);
 
 export default router;
