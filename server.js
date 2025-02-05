@@ -4,9 +4,12 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
+
 import connectDB from './config/db.js';
+
 import authRoutes from './routes/authRoutes.js';
 import mediaRoutes from './routes/mediaRoutes.js';
+import borrowRoutes from './routes/borrowRoutes.js';
 
 import User from './models/User.js';
 import Media from './models/Media.js';
@@ -28,6 +31,7 @@ app.use(morgan('dev'));
 // Ajouter les routes
 app.use('/api/auth', authRoutes);
 app.use('/api/media', mediaRoutes);
+app.use('/api/borrow', borrowRoutes);
 
 // Connexion à la base de données
 connectDB();
