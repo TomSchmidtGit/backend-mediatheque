@@ -13,16 +13,14 @@ import borrowRoutes from './routes/borrowRoutes.js';
 
 import swaggerDocs from './config/swaggerConfig.js';
 
-import User from './models/User.js';
-import Media from './models/Media.js';
-import Borrow from './models/Borrow.js';
-
-
 // Configuration des variables d'environnement
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Connexion à la base de données
+connectDB();
 
 // Middlewares
 app.use(express.json());
@@ -38,13 +36,14 @@ app.use('/api/borrow', borrowRoutes);
 // Initialisation de Swagger
 swaggerDocs(app);
 
-// Connexion à la base de données
-connectDB();
-
 // Route de test
 app.get('/api/health', (req, res) => {
     res.status(200).json({ message: 'API is running' });
 });
 
 // Démarrage du serveur
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+}
+
+export default app;
