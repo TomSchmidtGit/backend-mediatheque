@@ -4,6 +4,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
+import connectDB from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
+import mediaRoutes from './routes/mediaRoutes.js';
+
+import User from './models/User.js';
+import Media from './models/Media.js';
+import Borrow from './models/Borrow.js';
+
 
 // Configuration des variables d'environnement
 dotenv.config();
@@ -17,24 +25,17 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 
+// Ajouter les routes
+app.use('/api/auth', authRoutes);
+app.use('/api/media', mediaRoutes);
+
+// Connexion à la base de données
+connectDB();
+
 // Route de test
 app.get('/api/health', (req, res) => {
     res.status(200).json({ message: 'API is running' });
 });
 
-// Connexion à la base de données MongoDB
-const startServer = async () => {
-    try {
-        await mongoose.connect(process.env.MONGO_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        console.log('✅ MongoDB connected');
-        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-    } catch (error) {
-        console.error('❌ Database connection failed:', error);
-        process.exit(1);
-    }
-};
-
-startServer();
+// Démarrage du serveur
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
