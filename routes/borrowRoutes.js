@@ -5,12 +5,13 @@ import {
     getUserBorrows,
     getAllBorrows
 } from '../controllers/borrowController.js';
+import { protect, adminOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', borrowMedia);        // Emprunter un média
-router.put('/:id/return', returnMedia); // Rendre un média
-router.get('/user/:userId', getUserBorrows);  // Voir les emprunts d'un utilisateur
-router.get('/', getAllBorrows);       // Voir tous les emprunts (admin)
+router.post('/', protect, borrowMedia);        // Seuls les utilisateurs connectés peuvent emprunter
+router.put('/:id/return', protect, returnMedia); // Seuls les utilisateurs connectés peuvent retourner un média
+router.get('/user/:userId', protect, getUserBorrows);  // Seuls les utilisateurs connectés peuvent voir leurs emprunts
+router.get('/', protect, adminOnly, getAllBorrows);    // Seuls les admins peuvent voir tous les emprunts
 
 export default router;
