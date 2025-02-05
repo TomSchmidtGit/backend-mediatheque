@@ -11,7 +11,7 @@ describe('User Routes', () => {
         const adminLoginRes = await request(app)
             .post('/api/auth/login')
             .send({
-                email: 'admin@example.com', // 📌 Vérifie que cet utilisateur existe en base !
+                email: 'admin@example.com', // Vérifie que cet utilisateur existe en base !
                 password: 'admin'
             });
 
@@ -42,6 +42,31 @@ describe('User Routes', () => {
         expect(userLoginRes.statusCode).toBe(200);
         userToken = userLoginRes.body.token;
         expect(userToken).toBeDefined();
+    });
+
+    // ✅ Nouveau test : Un admin peut récupérer tous les utilisateurs
+    test('Un admin peut récupérer la liste des utilisateurs', async () => {
+        const res = await request(app)
+            .get('/api/users')
+            .set('Authorization', `Bearer ${adminToken}`);
+
+        console.log("Admin Get Users Response:", res.body); // 🔍 Debug
+
+        expect(res.statusCode).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBeGreaterThan(0);
+    });
+
+    // ✅ Nouveau test : Un utilisateur normal ne peut pas accéder à la liste des utilisateurs
+    test('Un utilisateur normal ne peut pas accéder à la liste des utilisateurs', async () => {
+        const res = await request(app)
+            .get('/api/users')
+            .set('Authorization', `Bearer ${userToken}`);
+
+        console.log("User Unauthorized Get Users Attempt:", res.body); // 🔍 Debug
+
+        expect(res.statusCode).toBe(403); // ❌ Doit être refusé
+        expect(res.body.message).toBe('Accès interdit');
     });
 
     test('Un admin peut modifier un utilisateur', async () => {
