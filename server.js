@@ -11,6 +11,8 @@ import authRoutes from './routes/authRoutes.js';
 import mediaRoutes from './routes/mediaRoutes.js';
 import borrowRoutes from './routes/borrowRoutes.js';
 
+import swaggerDocs from './config/swaggerConfig.js';
+
 import User from './models/User.js';
 import Media from './models/Media.js';
 import Borrow from './models/Borrow.js';
@@ -32,6 +34,9 @@ app.use(morgan('dev'));
 app.use('/api/auth', authRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/borrow', borrowRoutes);
+
+// Initialisation de Swagger
+swaggerDocs(app);
 
 // Connexion à la base de données
 connectDB();

@@ -1,0 +1,29 @@
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+
+const options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Médiathèque API',
+            version: '1.0.0',
+            description: 'Documentation de l’API de gestion de médiathèque'
+        },
+        servers: [
+            {
+                url: 'http://localhost:5000',
+                description: 'Serveur local'
+            }
+        ]
+    },
+    apis: ['./routes/*.js'], // On cible tous les fichiers de routes
+};
+
+const swaggerSpec = swaggerJSDoc(options);
+
+const swaggerDocs = (app) => {
+    app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    console.log('📄 Swagger docs disponible sur http://localhost:5000/api/docs');
+};
+
+export default swaggerDocs;
