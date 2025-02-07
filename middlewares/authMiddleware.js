@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-// ✅ Liste des tokens révoqués
+// Liste des tokens révoqués
 const blacklistedTokens = new Set();
 
-// ✅ Middleware de protection (vérification du token)
+// Middleware de protection (vérification du token)
 export const protect = async (req, res, next) => {
     let token;
 
@@ -35,7 +35,7 @@ export const protect = async (req, res, next) => {
     }
 };
 
-// ✅ Middleware pour révoquer un token lors de la déconnexion
+// Middleware pour révoquer un token lors de la déconnexion
 export const logout = (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (token) {
@@ -44,7 +44,7 @@ export const logout = (req, res) => {
     res.status(200).json({ message: 'Déconnexion réussie' });
 };
 
-// ✅ Vérifie si l'utilisateur est admin
+// Vérifie si l'utilisateur est admin
 export const adminOnly = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
         next(); // Autoriser l'accès
@@ -53,7 +53,7 @@ export const adminOnly = (req, res, next) => {
     }
 };
 
-// ✅ Vérifie si le rôle est autorisé
+// Vérifie si le rôle est autorisé
 export const authorizeRoles = (...roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {

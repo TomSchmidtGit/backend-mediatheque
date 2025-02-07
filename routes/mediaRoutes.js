@@ -1,73 +1,74 @@
 import express from 'express';
 import {
-    createMedia,
-    getAllMedia,
-    getMediaById,
-    updateMedia,
-    deleteMedia
+    createMedia, getAllMedia, getMediaById, updateMedia, deleteMedia,
+    addReview, updateReview
 } from '../controllers/mediaController.js';
 import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
-
+import upload from '../config/multer.js';
 
 const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   name: Media
- *   description: Gestion des médias (livres, films, musiques)
- */
-
-/**
- * @swagger
  * /api/media:
  *   post:
- *     summary: Ajouter un nouveau média (admin uniquement)
- *     tags: [Media]
+ *     summary: Ajouter un nouveau média avec upload d'image
+ *     description: Cette route permet d'ajouter un média (film, livre, musique) avec une image envoyée via `form-data`.
+ *     tags: [Médias]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
- *             required:
- *               - title
- *               - type
- *               - author
- *               - year
  *             properties:
  *               title:
  *                 type: string
- *                 example: The Matrix
+ *                 example: "Le Seigneur des Anneaux"
  *               type:
  *                 type: string
- *                 enum: [book, movie, music]
- *                 example: movie
+ *                 enum: ["book", "movie", "music"]
+ *                 example: "movie"
  *               author:
  *                 type: string
- *                 example: Wachowski Sisters
+ *                 example: "Peter Jackson"
  *               year:
- *                 type: number
- *                 example: 1999
+ *                 type: integer
+ *                 example: 2001
+ *               description:
+ *                 type: string
+ *                 example: "Un film culte !"
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       201:
- *         description: Média créé avec succès
+ *         description: Média ajouté avec succès.
  *       400:
- *         description: Erreur dans les données fournies
+ *         description: Erreur de validation des champs ou image manquante.
+ *       401:
+ *         description: Non autorisé. Nécessite un token.
  */
-router.post('/', protect, authorizeRoles('admin'), createMedia);
+router.post(
+    '/',
+    protect,
+    authorizeRoles('admin'),
+    upload.single('image'),
+    createMedia
+);
 
 /**
  * @swagger
  * /api/media:
  *   get:
  *     summary: Récupérer tous les médias
- *     tags: [Media]
+ *     description: Retourne la liste de tous les médias disponibles.
+ *     tags: [Médias]
  *     responses:
  *       200:
- *         description: Liste de tous les médias
+ *         description: Liste des médias récupérée avec succès.
  */
 router.get('/', getAllMedia);
 
@@ -75,20 +76,20 @@ router.get('/', getAllMedia);
  * @swagger
  * /api/media/{id}:
  *   get:
- *     summary: Récupérer un média spécifique par son ID
- *     tags: [Media]
+ *     summary: Récupérer un média par son ID
+ *     description: Retourne les détails d'un média spécifique.
+ *     tags: [Médias]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: ID du média
  *     responses:
  *       200:
- *         description: Détails du média
+ *         description: Média trouvé.
  *       404:
- *         description: Média non trouvé
+ *         description: Média non trouvé.
  */
 router.get('/:id', getMediaById);
 
@@ -96,8 +97,9 @@ router.get('/:id', getMediaById);
  * @swagger
  * /api/media/{id}:
  *   put:
- *     summary: Modifier un média existant (admin uniquement)
- *     tags: [Media]
+ *     summary: Modifier un média
+ *     description: Permet à un administrateur de modifier un média existant.
+ *     tags: [Médias]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -106,7 +108,6 @@ router.get('/:id', getMediaById);
  *         required: true
  *         schema:
  *           type: string
- *         description: ID du média à modifier
  *     requestBody:
  *       required: true
  *       content:
@@ -116,15 +117,21 @@ router.get('/:id', getMediaById);
  *             properties:
  *               title:
  *                 type: string
- *                 example: The Matrix Reloaded
+ *               type:
+ *                 type: string
+ *               author:
+ *                 type: string
  *               year:
- *                 type: number
- *                 example: 2003
+ *                 type: integer
+ *               description:
+ *                 type: string
+ *               imageUrl:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Média modifié avec succès
+ *         description: Média mis à jour avec succès.
  *       404:
- *         description: Média non trouvé
+ *         description: Média non trouvé.
  */
 router.put('/:id', protect, authorizeRoles('admin'), updateMedia);
 
@@ -132,8 +139,9 @@ router.put('/:id', protect, authorizeRoles('admin'), updateMedia);
  * @swagger
  * /api/media/{id}:
  *   delete:
- *     summary: Supprimer un média (admin uniquement)
- *     tags: [Media]
+ *     summary: Supprimer un média
+ *     description: Permet à un administrateur de supprimer un média existant.
+ *     tags: [Médias]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -142,13 +150,99 @@ router.put('/:id', protect, authorizeRoles('admin'), updateMedia);
  *         required: true
  *         schema:
  *           type: string
- *         description: ID du média à supprimer
  *     responses:
  *       200:
- *         description: Média supprimé avec succès
+ *         description: Média supprimé avec succès.
  *       404:
- *         description: Média non trouvé
+ *         description: Média non trouvé.
  */
 router.delete('/:id', protect, authorizeRoles('admin'), deleteMedia);
+
+/**
+ * @swagger
+ * /api/media/{id}/reviews:
+ *   post:
+ *     summary: Ajouter un avis sur un média
+ *     description: Un utilisateur peut ajouter un avis avec une note (1-5) et un commentaire.
+ *     tags: [Médias]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rating:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 5
+ *                 example: 5
+ *               comment:
+ *                 type: string
+ *                 example: "Excellent film !"
+ *     responses:
+ *       201:
+ *         description: Avis ajouté avec succès.
+ *       400:
+ *         description: L'utilisateur a déjà noté ce média.
+ */
+router.post('/:id/reviews', protect, addReview);
+
+/**
+ * @swagger
+ * /api/media/{id}/reviews:
+ *   put:
+ *     summary: Modifier un avis sur un média
+ *     description: Un utilisateur peut modifier son avis existant.
+ *     tags: [Médias]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rating:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 5
+ *                 example: 4
+ *               comment:
+ *                 type: string
+ *                 example: "Très bon mais un peu long"
+ *     responses:
+ *       200:
+ *         description: Avis mis à jour avec succès.
+ *       404:
+ *         description: Aucun avis trouvé pour cet utilisateur sur ce média.
+ */
+router.put('/:id/reviews', protect, updateReview);
+
+router.post('/test-upload', upload.single('image'), (req, res) => {
+    console.log("📝 Données reçues :", req.body);
+    console.log("📸 Fichier reçu :", req.file ? req.file.path : "Aucune image reçue");
+
+    if (!req.file) {
+        return res.status(400).json({ message: "L'image n'a pas été reçue par multer" });
+    }
+
+    res.status(200).json({ message: "Image reçue avec succès", imageUrl: req.file.path });
+});
 
 export default router;

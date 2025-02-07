@@ -7,7 +7,7 @@ const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 };
 
-// ✅ Inscription
+// Inscription
 export const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -37,7 +37,7 @@ export const registerUser = async (req, res) => {
     }
 };
 
-// ✅ Connexion
+// Connexion
 export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;

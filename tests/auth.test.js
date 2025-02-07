@@ -9,11 +9,11 @@ describe('Auth Routes', () => {
             .post('/api/auth/register')
             .send({
                 name: 'Test User',
-                email: `testuser${Date.now()}@example.com`, // ✅ Email unique
+                email: `testuser${Date.now()}@example.com`, // Email unique
                 password: 'password123'
             });
 
-        console.log("Register Response:", res.body); // 🔍 Debug
+        console.log("Register Response:", res.body); // Debug
 
         expect(res.statusCode).toBe(201);
         expect(res.body).toHaveProperty('token');
@@ -37,7 +37,7 @@ describe('Auth Routes', () => {
             .post('/api/auth/logout')
             .set('Authorization', `Bearer ${token}`);
 
-        console.log("Logout Response:", res.body); // 🔍 Debug
+        console.log("Logout Response:", res.body); // Debug
 
         expect(res.statusCode).toBe(200);
         expect(res.body.message).toBe('Déconnexion réussie');
@@ -48,7 +48,7 @@ describe('Auth Routes', () => {
             .get('/api/borrow')
             .set('Authorization', `Bearer ${token}`);
     
-        console.log("Access after Logout Response:", res.body); // 🔍 Debug
+        console.log("Access after Logout Response:", res.body); // Debug
     
         expect(res.statusCode).toBe(401);
         expect(res.body.message).toBe('Token expiré ou révoqué');

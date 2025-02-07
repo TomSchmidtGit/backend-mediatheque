@@ -1,6 +1,6 @@
 import User from '../models/User.js';
 
-// ✅ Récupérer tous les utilisateurs (admin uniquement)
+// Récupérer tous les utilisateurs (admin uniquement)
 export const getUsers = async (req, res) => {
     try {
         const users = await User.find().select('-password'); // ⚠️ Exclure les mots de passe
@@ -11,7 +11,7 @@ export const getUsers = async (req, res) => {
 };
 
 
-// ✅ Contrôleur pour modifier un utilisateur
+// Contrôleur pour modifier un utilisateur
 export const updateUser = async (req, res) => {
     try {
         const { name, email, role } = req.body;

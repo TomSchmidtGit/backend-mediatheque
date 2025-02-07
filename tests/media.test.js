@@ -1,68 +1,150 @@
 import request from 'supertest';
 import { app, server } from '../server.js';
+import fs from 'fs';
 
 describe('Media Routes', () => {
     let token;
+    let userToken;
+    let mediaId;
 
     beforeAll(async () => {
-        // ✅ Vérifier que l'admin peut se connecter
-        const res = await request(app)
+        const adminLogin = await request(app)
             .post('/api/auth/login')
             .send({
-                email: 'admin@example.com', // 📌 Vérifie que cet utilisateur existe en base !
+                email: 'admin@example.com',
                 password: 'admin'
             });
 
-        console.log("Login Admin Response:", res.body); // 🔍 Debug
+        token = adminLogin.body.token;
+        expect(token).toBeDefined();
 
-        token = res.body.token;
-        expect(token).toBeDefined(); // ✅ Vérifie que le token est bien récupéré
+        const userRegister = await request(app)
+            .post('/api/auth/register')
+            .send({
+                name: 'Test User',
+                email: `testuser${Date.now()}@example.com`,
+                password: 'password123'
+            });
+
+        const userLogin = await request(app)
+            .post('/api/auth/login')
+            .send({
+                email: userRegister.body.email,
+                password: 'password123'
+            });
+
+        userToken = userLogin.body.token;
+        expect(userToken).toBeDefined();
     });
 
-    test('Doit ajouter un nouveau média', async () => {
+    test('Ajouter un nouveau média avec image', async () => {
         const res = await request(app)
             .post('/api/media')
             .set('Authorization', `Bearer ${token}`)
-            .send({
-                title: 'The Matrix',
-                type: 'movie',
-                author: 'Wachowski Sisters',
-                year: 1999
-            });
-
-        console.log("Create Media Response:", res.body); // 🔍 Debug
-
+            .field('title', 'The Matrix')
+            .field('type', 'movie')
+            .field('author', 'Wachowski Sisters')
+            .field('year', 1999)
+            .field('description', 'Un film culte !')
+            .attach('image', 'tests/files/test-image.jpg');
+    
+        console.log("Response from media creation:", res.body);
+    
         expect(res.statusCode).toBe(201);
-    });
+        expect(res.body._id).toBeDefined();
+    
+        if (!res.body._id) {
+            throw new Error("❌ `mediaId` est `undefined`, arrêt des tests !");
+        }
+    
+        mediaId = res.body._id;
+    });    
+    
+    test('Uploader une image seule', async () => {
+        const res = await request(app)
+            .post('/api/media')
+            .set('Authorization', `Bearer ${token}`)
+            .attach('image', 'tests/files/test-image.jpg');
+    
+        console.log("Réponse de l'upload seul:", res.body);
+    });    
 
-    test('Doit récupérer tous les médias', async () => {
+    test('Récupérer tous les médias', async () => {
         const res = await request(app).get('/api/media');
         expect(res.statusCode).toBe(200);
         expect(Array.isArray(res.body)).toBe(true);
     });
 
-    test('Doit se déconnecter et invalider le token', async () => {
+    test('Récupérer un média par ID', async () => {
+        expect(mediaId).toBeDefined();
+
+        const res = await request(app).get(`/api/media/${mediaId}`);
+        expect(res.statusCode).toBe(200);
+        expect(res.body._id).toBe(mediaId);
+    });
+
+    test('Ajouter un avis sur un média', async () => {
+        expect(mediaId).toBeDefined();
+
         const res = await request(app)
-            .post('/api/auth/logout')
+            .post(`/api/media/${mediaId}/reviews`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({
+                rating: 5,
+                comment: 'Super film !'
+            });
+
+        expect(res.statusCode).toBe(201);
+        expect(res.body.reviews.length).toBe(1);
+    });
+
+    test('Un utilisateur ne peut pas ajouter plusieurs avis sur le même média', async () => {
+        expect(mediaId).toBeDefined();
+
+        const res = await request(app)
+            .post(`/api/media/${mediaId}/reviews`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({
+                rating: 3,
+                comment: 'Je change mon avis'
+            });
+
+        expect(res.statusCode).toBe(400);
+    });
+
+    test('Modifier un avis existant', async () => {
+        expect(mediaId).toBeDefined();
+
+        const res = await request(app)
+            .put(`/api/media/${mediaId}/reviews`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({
+                rating: 4,
+                comment: 'Finalement, un peu long...'
+            });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.reviews[0].rating).toBe(4);
+    });
+
+    test('Supprimer un média', async () => {
+        expect(mediaId).toBeDefined();
+
+        const res = await request(app)
+            .delete(`/api/media/${mediaId}`)
             .set('Authorization', `Bearer ${token}`);
 
         expect(res.statusCode).toBe(200);
     });
 
-    test('Ne doit plus pouvoir ajouter un média après déconnexion', async () => {
+    test('Vérifier si l’image est bien envoyée seule', async () => {
         const res = await request(app)
-            .post('/api/media')
+            .post('/api/media/test-upload')
             .set('Authorization', `Bearer ${token}`)
-            .send({
-                title: 'Another Movie',
-                type: 'movie',
-                author: 'Director',
-                year: 2020
-            });
-
-        expect(res.statusCode).toBe(401);
-        expect(res.body.message).toBe('Token expiré ou révoqué');
-    });
+            .attach('image', 'tests/files/test-image.jpg');
+    
+        console.log("Réponse de l'upload image seule :", res.body);
+    });    
 
     afterAll(async () => {
         if (server && server.close) {

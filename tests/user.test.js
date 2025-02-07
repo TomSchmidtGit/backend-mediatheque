@@ -7,7 +7,7 @@ describe('User Routes', () => {
     let userId;
 
     beforeAll(async () => {
-        // ✅ Connexion en tant qu'admin
+        // Connexion en tant qu'admin
         const adminLoginRes = await request(app)
             .post('/api/auth/login')
             .send({
@@ -19,7 +19,7 @@ describe('User Routes', () => {
         adminToken = adminLoginRes.body.token;
         expect(adminToken).toBeDefined();
 
-        // ✅ Création d'un utilisateur normal
+        // Création d'un utilisateur normal
         const userRegisterRes = await request(app)
             .post('/api/auth/register')
             .send({
@@ -31,7 +31,7 @@ describe('User Routes', () => {
         expect(userRegisterRes.statusCode).toBe(201);
         userId = userRegisterRes.body._id;
 
-        // ✅ Connexion en tant qu'utilisateur normal
+        // Connexion en tant qu'utilisateur normal
         const userLoginRes = await request(app)
             .post('/api/auth/login')
             .send({
@@ -44,7 +44,7 @@ describe('User Routes', () => {
         expect(userToken).toBeDefined();
     });
 
-    // ✅ Nouveau test : Un admin peut récupérer tous les utilisateurs
+    // Nouveau test : Un admin peut récupérer tous les utilisateurs
     test('Un admin peut récupérer la liste des utilisateurs', async () => {
         const res = await request(app)
             .get('/api/users')
@@ -57,7 +57,7 @@ describe('User Routes', () => {
         expect(res.body.length).toBeGreaterThan(0);
     });
 
-    // ✅ Nouveau test : Un utilisateur normal ne peut pas accéder à la liste des utilisateurs
+    // Nouveau test : Un utilisateur normal ne peut pas accéder à la liste des utilisateurs
     test('Un utilisateur normal ne peut pas accéder à la liste des utilisateurs', async () => {
         const res = await request(app)
             .get('/api/users')
@@ -75,7 +75,7 @@ describe('User Routes', () => {
             .set('Authorization', `Bearer ${adminToken}`)
             .send({
                 name: 'Updated User',
-                role: 'employee' // ✅ Un admin peut modifier le rôle
+                role: 'employee' // Un admin peut modifier le rôle
             });
 
         console.log("Admin Update User Response:", res.body); // 🔍 Debug
