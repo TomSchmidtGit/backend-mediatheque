@@ -1,41 +1,49 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-// Liste des tokens révoqués
+// Liste temporaire des tokens révoqués
 const blacklistedTokens = new Set();
 
-// Middleware de protection (vérification du token)
+// ✅ Middleware de protection des routes
 export const protect = async (req, res, next) => {
     let token;
 
+    // Récupération du token depuis les headers
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        try {
-            // Extraction du token
-            token = req.headers.authorization.split(' ')[1];
+        token = req.headers.authorization.split(' ')[1];
 
-            // Vérifier si le token est révoqué
+        try {
+            // Vérification : token révoqué ?
             if (blacklistedTokens.has(token)) {
                 return res.status(401).json({ message: 'Token expiré ou révoqué' });
             }
 
-            // Décoder le token
+            // Décodage du token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // Récupérer l'utilisateur (sans son mot de passe)
+            // Récupération de l'utilisateur
             req.user = await User.findById(decoded.id).select('-password');
 
-            next(); // Passe à la suite
-        } catch (error) {
-            return res.status(401).json({ message: 'Non autorisé, token invalide' });
-        }
-    }
+            if (!req.user) {
+                return res.status(401).json({ message: 'Utilisateur non trouvé' });
+            }
 
-    if (!token) {
+            next(); // OK, passe à la suite
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                return res.status(401).json({ message: 'Token expiré ou révoqué' });
+            } else if (error.name === 'JsonWebTokenError') {
+                return res.status(401).json({ message: 'Token invalide' });
+            } else {
+                return res.status(401).json({ message: 'Non autorisé' });
+            }
+        }
+    } else {
         return res.status(401).json({ message: 'Non autorisé, aucun token fourni' });
     }
 };
 
-// Middleware pour révoquer un token lors de la déconnexion
+// ✅ Middleware pour révoquer un token à la déconnexion
 export const logout = (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (token) {
@@ -44,16 +52,16 @@ export const logout = (req, res) => {
     res.status(200).json({ message: 'Déconnexion réussie' });
 };
 
-// Vérifie si l'utilisateur est admin
+// ✅ Vérifie si l'utilisateur est admin
 export const adminOnly = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
-        next(); // Autoriser l'accès
+        next();
     } else {
         res.status(403).json({ message: 'Accès refusé, réservé aux administrateurs' });
     }
 };
 
-// Vérifie si le rôle est autorisé
+// ✅ Vérifie si le rôle utilisateur est autorisé
 export const authorizeRoles = (...roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {

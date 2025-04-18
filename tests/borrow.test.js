@@ -18,10 +18,11 @@ describe('Borrow Routes', () => {
         expect(userToken).toBeDefined();
 
         const mediaRes = await request(app).get('/api/media');
-        expect(mediaRes.body.length).toBeGreaterThan(0);
-
-        mediaId = mediaRes.body[0]._id;
+        expect(Array.isArray(mediaRes.body.data)).toBe(true);
+        expect(mediaRes.body.data.length).toBeGreaterThan(0);
+        mediaId = mediaRes.body.data[0]._id;
         expect(mediaId).toBeDefined();
+
     });
 
     test('Doit emprunter un média', async () => {
@@ -33,7 +34,7 @@ describe('Borrow Routes', () => {
                 media: mediaId
             });
 
-        console.log("Borrow Response:", res.body); // 🔍 Debug
+        console.log("Borrow Response:", res.body);
 
         expect(res.statusCode).toBe(201);
         borrowId = res.body._id;
@@ -44,7 +45,7 @@ describe('Borrow Routes', () => {
             .put(`/api/borrow/${borrowId}/return`)
             .set('Authorization', `Bearer ${userToken}`);
 
-        console.log("Return Response:", res.body); // 🔍 Debug
+        console.log("Return Response:", res.body);
 
         expect(res.statusCode).toBe(200);
     });
