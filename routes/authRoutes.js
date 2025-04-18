@@ -2,6 +2,7 @@ import express from 'express';
 import { registerUser, loginUser } from '../controllers/authController.js';
 import { protect, logout } from '../middlewares/authMiddleware.js';
 import { body, validationResult } from 'express-validator';
+import { loginRateLimiter } from '../middlewares/rateLimiters.js';
 
 // Middleware de validation
 const validateUser = [
@@ -90,7 +91,7 @@ router.post('/register', validateUser, registerUser);
  *       401:
  *         description: Identifiants incorrects
  */
-router.post('/login', loginUser);
+router.post('/login', loginRateLimiter, loginUser); 
 
 
 /**
