@@ -3,7 +3,7 @@ import { registerUser, loginUser } from '../controllers/authController.js';
 import { protect, logout } from '../middlewares/authMiddleware.js';
 import { body, validationResult } from 'express-validator';
 
-// ✅ Middleware de validation
+// Middleware de validation
 const validateUser = [
     body('name').trim().notEmpty().withMessage('Le nom est requis'),
     body('email').isEmail().withMessage('Email invalide'),
