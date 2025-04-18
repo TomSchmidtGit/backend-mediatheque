@@ -3,6 +3,8 @@ import { registerUser, loginUser } from '../controllers/authController.js';
 import { protect, logout } from '../middlewares/authMiddleware.js';
 import { body, validationResult } from 'express-validator';
 import { loginRateLimiter } from '../middlewares/rateLimiters.js';
+import { registerValidator, loginValidator } from '../validators/authValidator.js';
+import { validateRequest } from '../middlewares/validateRequest.js';
 
 // Middleware de validation
 const validateUser = [
@@ -61,7 +63,7 @@ const router = express.Router();
  *       400:
  *         description: Erreur dans les données fournies
  */
-router.post('/register', validateUser, registerUser);
+router.post('/register', registerValidator, validateRequest, registerUser);
 
 /**
  * @swagger
@@ -91,7 +93,7 @@ router.post('/register', validateUser, registerUser);
  *       401:
  *         description: Identifiants incorrects
  */
-router.post('/login', loginRateLimiter, loginUser); 
+router.post('/login', loginRateLimiter, loginValidator, validateRequest, loginUser);
 
 
 /**
