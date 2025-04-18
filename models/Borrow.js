@@ -25,6 +25,9 @@ const BorrowSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+BorrowSchema.index({ user: 1 });
+BorrowSchema.index({ media: 1 });
+
 const Borrow = mongoose.model('Borrow', BorrowSchema);
 
 export default Borrow;

@@ -33,8 +33,22 @@ export const createMedia = async (req, res) => {
 // Récupérer tous les médias
 export const getAllMedia = async (req, res) => {
     try {
-        const mediaList = await Media.find();
-        res.status(200).json(mediaList);
+        const { page, limit, skip } = req.pagination;
+
+        const mediaList = await Media.find()
+            .select('title type year author imageUrl averageRating') // Limite les champs
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        const total = await Media.countDocuments();
+
+        res.status(200).json({
+            data: mediaList,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            totalItems: total
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -43,7 +57,7 @@ export const getAllMedia = async (req, res) => {
 // Récupérer un média par ID
 export const getMediaById = async (req, res) => {
     try {
-        const media = await Media.findById(req.params.id);
+        const media = await Media.findById(req.params.id).lean();
         if (!media) {
             return res.status(404).json({ message: 'Média non trouvé' });
         }

@@ -59,6 +59,9 @@ const MediaSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+MediaSchema.index({ title: 1 });
+MediaSchema.index({ type: 1 });
+
 MediaSchema.methods.updateAverageRating = async function () {
     if (this.reviews.length > 0) {
         this.averageRating = this.reviews.reduce((acc, review) => acc + review.rating, 0) / this.reviews.length;

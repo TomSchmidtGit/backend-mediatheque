@@ -1,4 +1,5 @@
 import express from 'express';
+import { paginate } from '../middlewares/pagination.js';
 import {
     createMedia, getAllMedia, getMediaById, updateMedia, deleteMedia,
     addReview, updateReview
@@ -63,14 +64,46 @@ router.post(
  * @swagger
  * /api/media:
  *   get:
- *     summary: Récupérer tous les médias
- *     description: Retourne la liste de tous les médias disponibles.
+ *     summary: Récupérer une liste paginée de médias
  *     tags: [Médias]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page à récupérer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Nombre de médias par page
  *     responses:
  *       200:
- *         description: Liste des médias récupérée avec succès.
+ *         description: Liste paginée des médias
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Media'
+ *                 currentPage:
+ *                   type: integer
+ *                   example: 1
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 5
+ *                 totalItems:
+ *                   type: integer
+ *                   example: 50
+ *       500:
+ *         description: Erreur serveur
  */
-router.get('/', getAllMedia);
+router.get('/', paginate(), getAllMedia);
 
 /**
  * @swagger
