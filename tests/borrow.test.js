@@ -5,10 +5,12 @@ import path from 'path';
 describe('Borrow Routes', () => {
     let userToken;
     let adminToken;
+    let userId;
     let mediaId;
     let borrowId;
 
     beforeAll(async () => {
+        // Connexion admin
         const adminLoginRes = await request(app)
             .post('/api/auth/login')
             .send({
@@ -19,6 +21,7 @@ describe('Borrow Routes', () => {
         adminToken = adminLoginRes.body.accessToken;
         expect(adminToken).toBeDefined();
 
+        // Connexion utilisateur
         const userLoginRes = await request(app)
             .post('/api/auth/login')
             .send({
@@ -27,8 +30,10 @@ describe('Borrow Routes', () => {
             });
 
         userToken = userLoginRes.body.accessToken;
+        userId = userLoginRes.body._id;
         expect(userToken).toBeDefined();
 
+        // Création d'un média à emprunter
         const createMediaRes = await request(app)
             .post('/api/media')
             .set('Authorization', `Bearer ${adminToken}`)
@@ -48,7 +53,7 @@ describe('Borrow Routes', () => {
             .post('/api/borrow')
             .set('Authorization', `Bearer ${userToken}`)
             .send({
-                user: '67a34674e1fc0ef2b5b5e74d',
+                user: userId,
                 media: mediaId
             });
 
@@ -65,6 +70,36 @@ describe('Borrow Routes', () => {
 
         console.log("Return Response:", res.body);
         expect(res.statusCode).toBe(200);
+    });
+
+    test('Un admin peut voir tous les emprunts avec pagination', async () => {
+        const res = await request(app)
+            .get('/api/borrow?page=1&limit=5')
+            .set('Authorization', `Bearer ${adminToken}`);
+    
+        expect(res.statusCode).toBe(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body).toHaveProperty('totalBorrows');
+    });
+
+    test('Un admin peut voir les emprunts d’un utilisateur avec pagination', async () => {
+        const res = await request(app)
+            .get(`/api/borrow/user/${userId}?page=1&limit=5`)
+            .set('Authorization', `Bearer ${adminToken}`);
+    
+        expect(res.statusCode).toBe(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.page).toBe(1);
+    });
+
+    test('Un utilisateur peut voir ses emprunts avec pagination', async () => {
+        const res = await request(app)
+            .get('/api/borrow/mine?page=1&limit=5')
+            .set('Authorization', `Bearer ${userToken}`);
+    
+        expect(res.statusCode).toBe(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.page).toBe(1);
     });
 
     afterAll(async () => {

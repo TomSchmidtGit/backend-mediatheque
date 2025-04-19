@@ -3,7 +3,8 @@ import {
     borrowMedia,
     returnMedia,
     getUserBorrows,
-    getAllBorrows
+    getAllBorrows,
+    getMyBorrows
 } from '../controllers/borrowController.js';
 import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
 
@@ -11,16 +12,9 @@ const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   name: Borrow
- *   description: Gestion des emprunts de médias
- */
-
-/**
- * @swagger
  * /api/borrow:
  *   post:
- *     summary: Emprunter un média (utilisateur connecté)
+ *     summary: Emprunter un média
  *     tags: [Borrow]
  *     security:
  *       - bearerAuth: []
@@ -30,16 +24,11 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - user
- *               - media
  *             properties:
  *               user:
  *                 type: string
- *                 example: 60d5f8f1f2951c001c8e4d9a
  *               media:
  *                 type: string
- *                 example: 60d5f8f1f2951c001c8e4d9b
  *     responses:
  *       201:
  *         description: Emprunt créé avec succès
@@ -52,7 +41,7 @@ router.post('/', protect, borrowMedia);
  * @swagger
  * /api/borrow/{id}/return:
  *   put:
- *     summary: Retourner un média emprunté
+ *     summary: Retourner un média
  *     tags: [Borrow]
  *     security:
  *       - bearerAuth: []
@@ -62,12 +51,9 @@ router.post('/', protect, borrowMedia);
  *         required: true
  *         schema:
  *           type: string
- *         description: ID de l'emprunt
  *     responses:
  *       200:
  *         description: Média retourné avec succès
- *       404:
- *         description: Emprunt non trouvé
  */
 router.put('/:id/return', protect, returnMedia);
 
@@ -75,34 +61,75 @@ router.put('/:id/return', protect, returnMedia);
  * @swagger
  * /api/borrow/user/{userId}:
  *   get:
- *     summary: Voir les emprunts d'un utilisateur
+ *     summary: Voir les emprunts d’un utilisateur (admin uniquement)
  *     tags: [Borrow]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: userId
+ *       - name: userId
+ *         in: path
  *         required: true
  *         schema:
  *           type: string
- *         description: ID de l'utilisateur
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Liste des emprunts de l'utilisateur
+ *         description: Liste paginée des emprunts de l'utilisateur
+ *       403:
+ *         description: Accès interdit - réservé aux administrateurs
  */
-router.get('/user/:userId', protect, getUserBorrows);
+router.get('/user/:userId', protect, authorizeRoles('admin'), getUserBorrows);
+
+/**
+ * @swagger
+ * /api/borrow/mine:
+ *   get:
+ *     summary: Voir ses propres emprunts
+ *     tags: [Borrow]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Liste paginée des emprunts de l'utilisateur
+ */
+router.get('/mine', protect, getMyBorrows);
 
 /**
  * @swagger
  * /api/borrow:
  *   get:
- *     summary: Voir tous les emprunts (admin uniquement)
+ *     summary: Voir tous les emprunts (admin)
  *     tags: [Borrow]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Liste de tous les emprunts
+ *         description: Liste paginée de tous les emprunts
  */
 router.get('/', protect, authorizeRoles('admin'), getAllBorrows);
 
