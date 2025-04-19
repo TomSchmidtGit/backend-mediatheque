@@ -15,7 +15,7 @@ describe('Media Routes', () => {
                 password: 'admin'
             });
 
-        token = adminLogin.body.token;
+        token = adminLogin.body.accessToken;
         expect(token).toBeDefined();
 
         const userRegister = await request(app)
@@ -33,7 +33,7 @@ describe('Media Routes', () => {
                 password: 'password123'
             });
 
-        userToken = userLogin.body.token;
+        userToken = userLogin.body.accessToken;
         expect(userToken).toBeDefined();
     });
 

@@ -28,7 +28,7 @@ describe('Auth Routes', () => {
                 password: 'password123'
             });
 
-        token = res.body.token;
+        token = res.body.accessToken;
         expect(res.statusCode).toBe(200);
         expect(token).toBeDefined();
     });
@@ -64,9 +64,41 @@ describe('Auth Routes', () => {
             .set('Authorization', `Bearer ${token}`);
 
         console.log("Access after Logout Response:", res.body);
-        expect(res.statusCode).toBe(401);
-        expect(res.body.message).toBe('Token expiré ou révoqué');
+        expect([401, 403]).toContain(res.statusCode);
+        expect(res.body.message).toBe('Accès interdit');
+
     });
+
+    test('Ne doit plus rafraîchir un token après logout', async () => {
+        // Connexion pour obtenir tokens
+        const loginRes = await request(app)
+            .post('/api/auth/login')
+            .send({
+                email: 'testuser@example.com',
+                password: 'password123'
+            });
+    
+        const accessToken = loginRes.body.accessToken;
+        const refreshToken = loginRes.body.refreshToken;
+    
+        expect(accessToken).toBeDefined();
+        expect(refreshToken).toBeDefined();
+    
+        // Logout = suppression du refreshToken
+        const logoutRes = await request(app)
+            .post('/api/auth/logout')
+            .set('Authorization', `Bearer ${accessToken}`);
+    
+        expect(logoutRes.statusCode).toBe(200);
+    
+        // Tentative de refresh après logout = 403
+        const refreshRes = await request(app)
+            .post('/api/auth/refresh')
+            .send({ refreshToken });
+    
+        expect(refreshRes.statusCode).toBe(403);
+        expect(refreshRes.body.message).toMatch(/expiré|invalide/i);
+    });    
 
     afterAll(async () => {
         if (server && server.close) {

@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser } from '../controllers/authController.js';
+import { registerUser, loginUser, refreshAccessToken, logoutUser } from '../controllers/authController.js';
 import { protect, logout } from '../middlewares/authMiddleware.js';
 import { body, validationResult } from 'express-validator';
 import { loginRateLimiter } from '../middlewares/rateLimiters.js';
@@ -128,6 +128,41 @@ router.post('/login', loginRateLimiter, loginValidator, validateRequest, loginUs
  *                   example: Non autorisé, token manquant
  */
 
-router.post('/logout', protect, logout);
+router.post('/logout', protect, logoutUser);
+
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Rafraîchir le token d'accès (JWT) à l'aide d'un refresh token valide
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Token de rafraîchissement fourni à la connexion
+ *     responses:
+ *       200:
+ *         description: Nouveau token d'accès généré avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *       400:
+ *         description: Token manquant
+ *       403:
+ *         description: Token invalide ou expiré
+ */
+router.post('/refresh', refreshAccessToken);
 
 export default router;
