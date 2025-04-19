@@ -1,28 +1,46 @@
 import request from 'supertest';
 import { app, server } from '../server.js';
+import path from 'path';
 
 describe('Borrow Routes', () => {
     let userToken;
+    let adminToken;
     let mediaId;
     let borrowId;
 
     beforeAll(async () => {
-        const loginRes = await request(app)
+        const adminLoginRes = await request(app)
+            .post('/api/auth/login')
+            .send({
+                email: 'admin@example.com',
+                password: 'admin'
+            });
+
+        adminToken = adminLoginRes.body.token;
+        expect(adminToken).toBeDefined();
+
+        const userLoginRes = await request(app)
             .post('/api/auth/login')
             .send({
                 email: 'testuser@example.com',
                 password: 'password123'
             });
 
-        userToken = loginRes.body.token;
+        userToken = userLoginRes.body.token;
         expect(userToken).toBeDefined();
 
-        const mediaRes = await request(app).get('/api/media');
-        expect(Array.isArray(mediaRes.body.data)).toBe(true);
-        expect(mediaRes.body.data.length).toBeGreaterThan(0);
-        mediaId = mediaRes.body.data[0]._id;
-        expect(mediaId).toBeDefined();
+        const createMediaRes = await request(app)
+            .post('/api/media')
+            .set('Authorization', `Bearer ${adminToken}`)
+            .field('title', 'Media de test emprunt')
+            .field('type', 'book')
+            .field('author', 'Test Author')
+            .field('year', 2025)
+            .field('description', 'Média temporaire')
+            .attach('image', 'tests/files/test-image.jpg');
 
+        mediaId = createMediaRes.body._id;
+        expect(mediaId).toBeDefined();
     });
 
     test('Doit emprunter un média', async () => {
@@ -30,14 +48,14 @@ describe('Borrow Routes', () => {
             .post('/api/borrow')
             .set('Authorization', `Bearer ${userToken}`)
             .send({
-                user: '67a34674e1fc0ef2b5b5e74d', // ID Admin
+                user: '67a34674e1fc0ef2b5b5e74d',
                 media: mediaId
             });
 
         console.log("Borrow Response:", res.body);
-
         expect(res.statusCode).toBe(201);
         borrowId = res.body._id;
+        expect(borrowId).toBeDefined();
     });
 
     test('Doit retourner un média', async () => {
@@ -46,7 +64,6 @@ describe('Borrow Routes', () => {
             .set('Authorization', `Bearer ${userToken}`);
 
         console.log("Return Response:", res.body);
-
         expect(res.statusCode).toBe(200);
     });
 
@@ -66,6 +83,8 @@ describe('Borrow Routes', () => {
                 user: '67a34674e1fc0ef2b5b5e74d',
                 media: mediaId
             });
+
+        console.log('❌ Erreur après logout:', res.body);
 
         expect(res.statusCode).toBe(401);
         expect(res.body.message).toBe('Token expiré ou révoqué');
