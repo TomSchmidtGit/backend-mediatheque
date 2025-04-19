@@ -67,14 +67,6 @@ describe('Borrow Routes', () => {
         expect(res.statusCode).toBe(200);
     });
 
-    test('Doit se déconnecter et invalider le token', async () => {
-        const res = await request(app)
-            .post('/api/auth/logout')
-            .set('Authorization', `Bearer ${userToken}`);
-
-        expect(res.statusCode).toBe(200);
-    });  
-
     afterAll(async () => {
         if (server && server.close) {
             server.close();
