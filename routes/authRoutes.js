@@ -1,7 +1,10 @@
 import express from 'express';
-import { registerUser, loginUser } from '../controllers/authController.js';
+import { registerUser, loginUser, refreshAccessToken, logoutUser } from '../controllers/authController.js';
 import { protect, logout } from '../middlewares/authMiddleware.js';
 import { body, validationResult } from 'express-validator';
+import { loginRateLimiter } from '../middlewares/rateLimiters.js';
+import { registerValidator, loginValidator } from '../validators/authValidator.js';
+import { validateRequest } from '../middlewares/validateRequest.js';
 
 // Middleware de validation
 const validateUser = [
@@ -60,7 +63,7 @@ const router = express.Router();
  *       400:
  *         description: Erreur dans les données fournies
  */
-router.post('/register', validateUser, registerUser);
+router.post('/register', registerValidator, validateRequest, registerUser);
 
 /**
  * @swagger
@@ -90,7 +93,7 @@ router.post('/register', validateUser, registerUser);
  *       401:
  *         description: Identifiants incorrects
  */
-router.post('/login', loginUser);
+router.post('/login', loginRateLimiter, loginValidator, validateRequest, loginUser);
 
 
 /**
@@ -125,6 +128,41 @@ router.post('/login', loginUser);
  *                   example: Non autorisé, token manquant
  */
 
-router.post('/logout', protect, logout);
+router.post('/logout', protect, logoutUser);
+
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Rafraîchir le token d'accès (JWT) à l'aide d'un refresh token valide
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Token de rafraîchissement fourni à la connexion
+ *     responses:
+ *       200:
+ *         description: Nouveau token d'accès généré avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *       400:
+ *         description: Token manquant
+ *       403:
+ *         description: Token invalide ou expiré
+ */
+router.post('/refresh', refreshAccessToken);
 
 export default router;

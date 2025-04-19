@@ -11,12 +11,12 @@ describe('User Routes', () => {
         const adminLoginRes = await request(app)
             .post('/api/auth/login')
             .send({
-                email: 'admin@example.com', // Vérifie que cet utilisateur existe en base !
+                email: 'admin@example.com',
                 password: 'admin'
             });
 
         expect(adminLoginRes.statusCode).toBe(200);
-        adminToken = adminLoginRes.body.token;
+        adminToken = adminLoginRes.body.accessToken;
         expect(adminToken).toBeDefined();
 
         // Création d'un utilisateur normal
@@ -40,7 +40,7 @@ describe('User Routes', () => {
             });
 
         expect(userLoginRes.statusCode).toBe(200);
-        userToken = userLoginRes.body.token;
+        userToken = userLoginRes.body.accessToken;
         expect(userToken).toBeDefined();
     });
 
@@ -50,7 +50,7 @@ describe('User Routes', () => {
             .get('/api/users')
             .set('Authorization', `Bearer ${adminToken}`);
 
-        console.log("Admin Get Users Response:", res.body); // 🔍 Debug
+        console.log("Admin Get Users Response:", res.body);
 
         expect(res.statusCode).toBe(200);
         expect(Array.isArray(res.body)).toBe(true);
@@ -63,9 +63,9 @@ describe('User Routes', () => {
             .get('/api/users')
             .set('Authorization', `Bearer ${userToken}`);
 
-        console.log("User Unauthorized Get Users Attempt:", res.body); // 🔍 Debug
+        console.log("User Unauthorized Get Users Attempt:", res.body);
 
-        expect(res.statusCode).toBe(403); // ❌ Doit être refusé
+        expect(res.statusCode).toBe(403);
         expect(res.body.message).toBe('Accès interdit');
     });
 
@@ -78,7 +78,7 @@ describe('User Routes', () => {
                 role: 'employee' // Un admin peut modifier le rôle
             });
 
-        console.log("Admin Update User Response:", res.body); // 🔍 Debug
+        console.log("Admin Update User Response:", res.body);
 
         expect(res.statusCode).toBe(200);
         expect(res.body.name).toBe('Updated User');
@@ -93,9 +93,9 @@ describe('User Routes', () => {
                 name: 'Hacker Attempt'
             });
 
-        console.log("User Unauthorized Update Attempt:", res.body); // 🔍 Debug
+        console.log("User Unauthorized Update Attempt:", res.body);
 
-        expect(res.statusCode).toBe(403); // ❌ Doit être refusé
+        expect(res.statusCode).toBe(403);
         expect(res.body.message).toBe('Accès interdit');
     });
 

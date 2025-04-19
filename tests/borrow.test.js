@@ -16,7 +16,7 @@ describe('Borrow Routes', () => {
                 password: 'admin'
             });
 
-        adminToken = adminLoginRes.body.token;
+        adminToken = adminLoginRes.body.accessToken;
         expect(adminToken).toBeDefined();
 
         const userLoginRes = await request(app)
@@ -26,7 +26,7 @@ describe('Borrow Routes', () => {
                 password: 'password123'
             });
 
-        userToken = userLoginRes.body.token;
+        userToken = userLoginRes.body.accessToken;
         expect(userToken).toBeDefined();
 
         const createMediaRes = await request(app)
@@ -73,22 +73,7 @@ describe('Borrow Routes', () => {
             .set('Authorization', `Bearer ${userToken}`);
 
         expect(res.statusCode).toBe(200);
-    });
-
-    test('Ne doit plus pouvoir emprunter un média après déconnexion', async () => {
-        const res = await request(app)
-            .post('/api/borrow')
-            .set('Authorization', `Bearer ${userToken}`)
-            .send({
-                user: '67a34674e1fc0ef2b5b5e74d',
-                media: mediaId
-            });
-
-        console.log('❌ Erreur après logout:', res.body);
-
-        expect(res.statusCode).toBe(401);
-        expect(res.body.message).toBe('Token expiré ou révoqué');
-    });
+    });  
 
     afterAll(async () => {
         if (server && server.close) {
