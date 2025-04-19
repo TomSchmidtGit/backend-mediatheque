@@ -72,7 +72,8 @@ describe('Media Routes', () => {
     test('Récupérer tous les médias', async () => {
         const res = await request(app).get('/api/media');
         expect(res.statusCode).toBe(200);
-        expect(Array.isArray(res.body)).toBe(true);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     test('Récupérer un média par ID', async () => {
