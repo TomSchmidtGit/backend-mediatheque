@@ -89,6 +89,27 @@ router.post(
  *           type: integer
  *           default: 10
  *         description: Nombre de médias par page
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [book, movie, music]
+ *         description: Type de média à filtrer (ex: book, movie, music)
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: ID de la catégorie (facultatif)
+ *       - in: query
+ *         name: tags
+ *         schema:
+ *           type: string
+ *         description: Liste d'IDs de tags séparés par virgule (ex: tag1,tag2)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Recherche par mot-clé dans le titre, la description ou l'auteur
  *     responses:
  *       200:
  *         description: Liste paginée des médias

@@ -35,26 +35,52 @@ export const createMedia = async (req, res) => {
 // Récupérer tous les médias
 export const getAllMedia = async (req, res) => {
     try {
-        const { page, limit, skip } = req.pagination;
-
-        const mediaList = await Media.find()
-            .select('title type year author imageUrl averageRating') // Limite les champs
-            .skip(skip)
-            .limit(limit)
-            .lean();
-
-        const total = await Media.countDocuments();
-
-        res.status(200).json({
-            data: mediaList,
-            currentPage: page,
-            totalPages: Math.ceil(total / limit),
-            totalItems: total
-        });
+      const { page, limit, skip } = req.pagination;
+      const { category, tags, type, search } = req.query;
+  
+      const query = {};
+  
+      if (type) {
+        query.type = type;
+      }
+  
+      if (category) {
+        query.category = category;
+      }
+  
+      if (tags) {
+        const tagList = Array.isArray(tags)
+          ? tags
+          : tags.split(',').map(tag => tag.trim());
+        query.tags = { $all: tagList };
+      }
+  
+      if (search) {
+        query.$or = [
+          { title: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { author: { $regex: search, $options: 'i' } }
+        ];
+      }
+  
+      const mediaList = await Media.find(query)
+        .select('title type year author imageUrl averageRating category tags')
+        .skip(skip)
+        .limit(limit)
+        .lean();
+  
+      const total = await Media.countDocuments(query);
+  
+      res.status(200).json({
+        data: mediaList,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total
+      });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message });
     }
-};
+  };    
 
 // Récupérer un média par ID
 export const getMediaById = async (req, res) => {

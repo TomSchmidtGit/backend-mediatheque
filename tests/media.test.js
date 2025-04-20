@@ -101,6 +101,44 @@ describe('Media Routes', () => {
         expect(res.body.data.length).toBeGreaterThan(0);
     });
 
+    test('Rechercher un média par mot-clé', async () => {
+        expect(mediaId).toBeDefined();
+    
+        const res = await request(app)
+            .get('/api/media')
+            .query({ search: 'matrix' });
+    
+        expect(res.statusCode).toBe(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+    
+        const found = res.body.data.find(m => m._id === mediaId);
+        expect(found).toBeDefined();
+        expect(found.title.toLowerCase()).toContain('matrix');
+    });    
+
+    test('Filtrer les médias par type, catégorie et tags', async () => {
+        expect(mediaId).toBeDefined();
+    
+        const resMedia = await request(app).get(`/api/media/${mediaId}`);
+        expect(resMedia.statusCode).toBe(200);
+        const media = resMedia.body;
+    
+        const tagIds = media.tags.map(tag => tag.toString());
+        const categoryId = media.category;
+    
+        const res = await request(app)
+            .get('/api/media')
+            .query({
+                type: media.type,
+                category: categoryId,
+                tags: tagIds.join(',')
+            });
+    
+        expect(res.statusCode).toBe(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.find(m => m._id === mediaId)).toBeDefined();
+    });    
+
     test('Récupérer un média par ID', async () => {
         expect(mediaId).toBeDefined();
 
