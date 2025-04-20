@@ -41,6 +41,16 @@ const router = express.Router();
  *               description:
  *                 type: string
  *                 example: "Un film culte !"
+ *               category:
+ *                 type: string
+ *                 description: ID de la catégorie (facultatif)
+ *                 example: "661e2fe9b842fe7cbd6df154"
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Liste d'IDs de tags (facultatif)
+ *                 example: ["661e3105b842fe7cbd6df158", "661e3117b842fe7cbd6df15a"]
  *               image:
  *                 type: string
  *                 format: binary
@@ -160,6 +170,14 @@ router.get('/:id', getMediaById);
  *                 type: string
  *               imageUrl:
  *                 type: string
+ *               category:
+ *                 type: string
+ *                 description: ID de la catégorie (facultatif)
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Liste d'IDs de tags (facultatif)
  *     responses:
  *       200:
  *         description: Média mis à jour avec succès.

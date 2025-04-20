@@ -6,10 +6,10 @@ export const createMedia = async (req, res) => {
         console.log("📝 Données reçues :", req.body);
         console.log("📸 Fichier reçu :", req.file ? req.file.path : "Aucune image reçue");
 
-        const { title, type, author, year, description } = req.body;
+        const { title, type, author, year, description, category, tags } = req.body;
 
         if (!title || !type || !author || !year || !req.file) {
-            return res.status(400).json({ message: "Tous les champs sont obligatoires, y compris l'image" });
+            return res.status(400).json({ message: "Tous les champs obligatoires doivent être fournis, y compris l'image" });
         }
 
         const imageUrl = req.file.path;
@@ -20,7 +20,9 @@ export const createMedia = async (req, res) => {
             author,
             year: parseInt(year, 10),
             description,
-            imageUrl
+            imageUrl,
+            category: category || null,
+            tags: Array.isArray(tags) ? tags : []
         });
 
         const savedMedia = await media.save();
@@ -70,10 +72,18 @@ export const getMediaById = async (req, res) => {
 // Modifier un média
 export const updateMedia = async (req, res) => {
     try {
-        const updatedMedia = await Media.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updateData = {
+            ...req.body,
+            category: req.body.category || null,
+            tags: Array.isArray(req.body.tags) ? req.body.tags : []
+        };
+
+        const updatedMedia = await Media.findByIdAndUpdate(req.params.id, updateData, { new: true });
+
         if (!updatedMedia) {
             return res.status(404).json({ message: 'Média non trouvé' });
         }
+
         res.status(200).json(updatedMedia);
     } catch (error) {
         res.status(500).json({ error: error.message });

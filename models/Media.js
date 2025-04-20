@@ -49,6 +49,14 @@ const MediaSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category'
+    },
+    tags: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tag'
+    }],
     imageUrl: {
         type: String
     },
@@ -56,7 +64,7 @@ const MediaSchema = new mongoose.Schema({
     averageRating: {
         type: Number,
         default: 0
-    }
+    },     
 }, { timestamps: true });
 
 MediaSchema.index({ title: 1 });
