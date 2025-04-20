@@ -22,7 +22,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         enum: ['user', 'employee', 'admin'],
         default: 'user'
-    }
+    },
+    favorites: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Media'
+    }]    
 }, { timestamps: true });
 
 UserSchema.index({ email: 1 });

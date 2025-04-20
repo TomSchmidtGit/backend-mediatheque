@@ -37,3 +37,63 @@ export const updateUser = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// Ajouter ou retirer un favori
+export const toggleFavorite = async (req, res) => {
+    const userId = req.user._id;
+    const { mediaId } = req.body;
+
+    if (!mediaId) {
+        return res.status(400).json({ message: 'mediaId est requis' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+
+    const index = user.favorites.indexOf(mediaId);
+    if (index > -1) {
+        user.favorites.splice(index, 1);
+        await user.save();
+        return res.status(200).json({ message: 'Média retiré des favoris' });
+    } else {
+        user.favorites.push(mediaId);
+        await user.save();
+        return res.status(200).json({ message: 'Média ajouté aux favoris' });
+    }
+};
+
+// Récupérer les favoris de l'utilisateur avec pagination
+export const getMyFavorites = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const user = await User.findById(userId).populate({
+            path: 'favorites',
+            options: {
+                skip,
+                limit
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        const totalItems = user.favorites.length;
+        const totalPages = Math.ceil(totalItems / limit);
+
+        res.status(200).json({
+            data: user.favorites,
+            page,
+            limit,
+            totalItems,
+            totalPages
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la récupération des favoris", error: error.message });
+    }
+};
