@@ -37,7 +37,31 @@ describe('Media Routes', () => {
         expect(userToken).toBeDefined();
     });
 
-    test('Ajouter un nouveau média avec image', async () => {
+    test('Ajouter un nouveau média avec image, catégorie et tags', async () => {
+        const timestamp = Date.now();
+
+        const categoryRes = await request(app)
+            .post('/api/categories')
+            .set('Authorization', `Bearer ${token}`)
+            .send({ name: `Science-fiction ${timestamp}` });
+
+        expect(categoryRes.statusCode).toBe(201);
+        const categoryId = categoryRes.body._id;
+
+        const tagRes1 = await request(app)
+            .post('/api/tags')
+            .set('Authorization', `Bearer ${token}`)
+            .send({ name: `Tag 1 - ${timestamp}` });
+
+        const tagRes2 = await request(app)
+            .post('/api/tags')
+            .set('Authorization', `Bearer ${token}`)
+            .send({ name: `Tag 2 - ${timestamp}` });
+
+        expect(tagRes1.statusCode).toBe(201);
+        expect(tagRes2.statusCode).toBe(201);
+        const tagIds = [tagRes1.body._id, tagRes2.body._id];
+
         const res = await request(app)
             .post('/api/media')
             .set('Authorization', `Bearer ${token}`)
@@ -46,28 +70,29 @@ describe('Media Routes', () => {
             .field('author', 'Wachowski Sisters')
             .field('year', 1999)
             .field('description', 'Un film culte !')
+            .field('category', categoryId)
+            .field('tags', tagIds[0])
+            .field('tags', tagIds[1])
             .attach('image', 'tests/files/test-image.jpg');
-    
+
         console.log("Response from media creation:", res.body);
-    
+
         expect(res.statusCode).toBe(201);
         expect(res.body._id).toBeDefined();
-    
-        if (!res.body._id) {
-            throw new Error("❌ `mediaId` est `undefined`, arrêt des tests !");
-        }
-    
+        expect(res.body.category).toBe(categoryId);
+        expect(res.body.tags).toEqual(expect.arrayContaining(tagIds));
+
         mediaId = res.body._id;
-    });    
-    
+    });
+
     test('Uploader une image seule', async () => {
         const res = await request(app)
             .post('/api/media')
             .set('Authorization', `Bearer ${token}`)
             .attach('image', 'tests/files/test-image.jpg');
-    
+
         console.log("Réponse de l'upload seul:", res.body);
-    });    
+    });
 
     test('Récupérer tous les médias', async () => {
         const res = await request(app).get('/api/media');
@@ -128,6 +153,26 @@ describe('Media Routes', () => {
         expect(res.body.reviews[0].rating).toBe(4);
     });
 
+    test('Modifier un média existant', async () => {
+        expect(mediaId).toBeDefined();
+    
+        const res = await request(app)
+            .put(`/api/media/${mediaId}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                title: 'The Matrix Remastered',
+                description: 'Version restaurée 4K',
+                category: null,
+                tags: []
+            });
+    
+        expect(res.statusCode).toBe(200);
+        expect(res.body.title).toBe('The Matrix Remastered');
+        expect(res.body.description).toBe('Version restaurée 4K');
+        expect(res.body.category).toBeNull();
+        expect(res.body.tags).toEqual([]);
+    });    
+
     test('Supprimer un média', async () => {
         expect(mediaId).toBeDefined();
 
@@ -143,9 +188,9 @@ describe('Media Routes', () => {
             .post('/api/media/test-upload')
             .set('Authorization', `Bearer ${token}`)
             .attach('image', 'tests/files/test-image.jpg');
-    
+
         console.log("Réponse de l'upload image seule :", res.body);
-    });    
+    });
 
     afterAll(async () => {
         if (server && server.close) {
