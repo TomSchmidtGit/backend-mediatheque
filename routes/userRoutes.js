@@ -1,6 +1,7 @@
 import express from 'express';
 import { getUsers, updateUser } from '../controllers/userController.js';
 import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
+import { toggleFavorite, getMyFavorites } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -85,5 +86,50 @@ router.get('/', protect, authorizeRoles('admin'), getUsers);
  *         description: Utilisateur non trouvé.
  */
 router.put('/:id', protect, authorizeRoles('admin'), updateUser);
+
+/**
+ * @swagger
+ * /api/users/favorites/toggle:
+ *   post:
+ *     summary: Ajouter ou retirer un média des favoris
+ *     tags: [Utilisateurs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mediaId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Favori ajouté ou retiré avec succès
+ */
+router.post('/favorites/toggle', protect, toggleFavorite);
+
+/**
+ * @swagger
+ * /api/users/favorites:
+ *   get:
+ *     summary: Récupérer les favoris de l'utilisateur connecté
+ *     tags: [Utilisateurs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Liste paginée des favoris
+ */
+router.get('/favorites', protect, getMyFavorites);
 
 export default router;
