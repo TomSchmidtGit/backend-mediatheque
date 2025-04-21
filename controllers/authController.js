@@ -45,6 +45,9 @@ export const loginUser = async (req, res) => {
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
+        if (user && !user.actif) {
+            return res.status(403).json({ message: 'Ce compte a été désactivé par un administrateur.' });
+          }          
 
         if (!user || !(await user.matchPassword(password))) {
             return res.status(401).json({ message: 'Invalid email or password' });

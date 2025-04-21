@@ -26,7 +26,11 @@ const UserSchema = new mongoose.Schema({
     favorites: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Media'
-    }]    
+    }],
+    actif: {
+        type: Boolean,
+        default: true
+      }          
 }, { timestamps: true });
 
 UserSchema.index({ email: 1 });
