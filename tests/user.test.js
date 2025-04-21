@@ -6,6 +6,7 @@ describe('User Routes', () => {
     let userToken;
     let userId;
     let mediaId;
+    let userEmail;
 
     beforeAll(async () => {
         const adminLoginRes = await request(app)
@@ -26,6 +27,8 @@ describe('User Routes', () => {
                 email: `usertest${Date.now()}@example.com`,
                 password: 'password123'
             });
+
+        userEmail = userRegisterRes.body.email;
 
         expect(userRegisterRes.statusCode).toBe(201);
         userId = userRegisterRes.body._id;
@@ -132,6 +135,25 @@ describe('User Routes', () => {
         expect(res.statusCode).toBe(200);
         expect(res.body.message).toBe('Média retiré des favoris');
     });
+
+    test('Un admin peut désactiver un utilisateur, qui ne pourra plus se connecter', async () => {
+        const resDeactivate = await request(app)
+            .patch(`/api/users/${userId}/deactivate`)
+            .set('Authorization', `Bearer ${adminToken}`);
+    
+        expect(resDeactivate.statusCode).toBe(200);
+        expect(resDeactivate.body.message).toMatch(/désactivé/i);
+    
+        const loginAttempt = await request(app)
+            .post('/api/auth/login')
+            .send({
+                email: userEmail,
+                password: 'admin'
+            });
+    
+        expect(loginAttempt.statusCode).toBe(403);
+        expect(loginAttempt.body.message).toMatch(/désactivé/i);
+    });    
 
     afterAll(async () => {
         if (server && server.close) {

@@ -97,3 +97,24 @@ export const getMyFavorites = async (req, res) => {
         res.status(500).json({ message: "Erreur lors de la récupération des favoris", error: error.message });
     }
 };
+
+export const deactivateUser = async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+  
+      if (!user) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+  
+      if (!user.actif) {
+        return res.status(400).json({ message: 'Utilisateur déjà désactivé' });
+      }
+  
+      user.actif = false;
+      await user.save();
+  
+      res.status(200).json({ message: 'Utilisateur désactivé avec succès' });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  };

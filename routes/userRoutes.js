@@ -2,6 +2,7 @@ import express from 'express';
 import { getUsers, updateUser } from '../controllers/userController.js';
 import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
 import { toggleFavorite, getMyFavorites } from '../controllers/userController.js';
+import { deactivateUser } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -131,5 +132,31 @@ router.post('/favorites/toggle', protect, toggleFavorite);
  *         description: Liste paginée des favoris
  */
 router.get('/favorites', protect, getMyFavorites);
+
+/**
+ * @swagger
+ * /api/users/{id}/deactivate:
+ *   patch:
+ *     summary: Désactiver un utilisateur
+ *     description: Permet à un administrateur de désactiver un compte utilisateur sans le supprimer.
+ *     tags: [Utilisateurs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de l'utilisateur à désactiver.
+ *     responses:
+ *       200:
+ *         description: Utilisateur désactivé avec succès.
+ *       400:
+ *         description: L'utilisateur est déjà désactivé.
+ *       404:
+ *         description: Utilisateur non trouvé.
+ */
+router.patch('/:id/deactivate', protect, authorizeRoles('admin'), deactivateUser);
 
 export default router;
