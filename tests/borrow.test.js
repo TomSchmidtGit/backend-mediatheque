@@ -8,6 +8,8 @@ describe('Borrow Routes', () => {
     let userId;
     let mediaId;
     let borrowId;
+    const testEmail = `testuser_${Date.now()}_${Math.floor(Math.random()*10000)}@example.com`;
+    const testPassword = 'password123';
 
     beforeAll(async () => {
         // Connexion admin
@@ -21,12 +23,21 @@ describe('Borrow Routes', () => {
         adminToken = adminLoginRes.body.accessToken;
         expect(adminToken).toBeDefined();
 
+        // Création utilisateur
+        const userRegisterRes = await request(app)
+            .post('/api/auth/register')
+            .send({
+                name: 'Test User',
+                email: testEmail,
+                password: testPassword
+            });
+
         // Connexion utilisateur
         const userLoginRes = await request(app)
             .post('/api/auth/login')
             .send({
-                email: 'testuser@example.com',
-                password: 'password123'
+                email: testEmail,
+                password: testPassword
             });
 
         userToken = userLoginRes.body.accessToken;

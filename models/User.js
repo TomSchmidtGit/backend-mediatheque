@@ -33,8 +33,6 @@ const UserSchema = new mongoose.Schema({
       }          
 }, { timestamps: true });
 
-UserSchema.index({ email: 1 });
-
 // Hashage du mot de passe avant sauvegarde
 UserSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();

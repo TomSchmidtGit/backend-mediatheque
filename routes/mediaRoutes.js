@@ -94,7 +94,7 @@ router.post(
  *         schema:
  *           type: string
  *           enum: [book, movie, music]
- *         description: Type de média à filtrer (ex: book, movie, music)
+ *         description: Type de média à filtrer (book, movie, music etc.)
  *       - in: query
  *         name: category
  *         schema:
@@ -104,7 +104,7 @@ router.post(
  *         name: tags
  *         schema:
  *           type: string
- *         description: Liste d'IDs de tags séparés par virgule (ex: tag1,tag2)
+ *         description: Liste d'IDs de tags séparés par virgule (tag1,tag2 etc.)
  *       - in: query
  *         name: search
  *         schema:
