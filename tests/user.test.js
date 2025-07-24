@@ -8,6 +8,8 @@ describe('User Routes', () => {
     let userId;
     let mediaId;
     let userEmail;
+    const testEmail = `testuser_${Date.now()}_${Math.floor(Math.random()*10000)}@example.com`;
+    const testPassword = 'password123';
 
     beforeAll(async () => {
         const adminLoginRes = await request(app)
@@ -25,11 +27,11 @@ describe('User Routes', () => {
             .post('/api/auth/register')
             .send({
                 name: 'User Test',
-                email: `testuser@example.com`,
-                password: 'password123'
+                email: testEmail,
+                password: testPassword
             });
 
-        userEmail = userRegisterRes.body.email;
+        userEmail = testEmail;
 
         expect(userRegisterRes.statusCode).toBe(201);
         userId = userRegisterRes.body._id;
@@ -37,8 +39,8 @@ describe('User Routes', () => {
         const userLoginRes = await request(app)
             .post('/api/auth/login')
             .send({
-                email: userRegisterRes.body.email,
-                password: 'password123'
+                email: testEmail,
+                password: testPassword
             });
 
         expect(userLoginRes.statusCode).toBe(200);
@@ -148,8 +150,8 @@ describe('User Routes', () => {
         const loginAttempt = await request(app)
             .post('/api/auth/login')
             .send({
-                email: userEmail,
-                password: 'password123'
+                email: testEmail,
+                password: testPassword
             });
     
         expect(loginAttempt.statusCode).toBe(403);
