@@ -66,7 +66,7 @@ L'API tourne sur `http://localhost:5001`
 Swagger est activé pour documenter l'API.
 Accédez à la doc interactive sur :
 ```bash
-http://localhost:1/api/docs
+http://localhost:5001/api/docs
 ```
 
 ---
