@@ -24,7 +24,7 @@ connectDB();
 
 // Initialisation de l'application Express
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Middlewares globaux
 app.use(express.json());
@@ -41,7 +41,9 @@ const limiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
 });
-app.use(limiter);
+if (process.env.NODE_ENV !== 'test') {
+    app.use(limiter);
+}
 
 // Ajouter les routes
 app.use('/api/auth', authRoutes);

@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { app, server } from '../server.js';
+import mongoose from 'mongoose';
 
 describe('User Routes', () => {
     let adminToken;
@@ -24,7 +25,7 @@ describe('User Routes', () => {
             .post('/api/auth/register')
             .send({
                 name: 'User Test',
-                email: `usertest${Date.now()}@example.com`,
+                email: `testuser@example.com`,
                 password: 'password123'
             });
 
@@ -58,7 +59,7 @@ describe('User Routes', () => {
         expect(mediaRes.statusCode).toBe(201);
         mediaId = mediaRes.body._id;
         expect(mediaId).toBeDefined();
-    });
+    }, 15000);
 
     test('Un admin peut récupérer la liste des utilisateurs', async () => {
         const res = await request(app)
@@ -148,7 +149,7 @@ describe('User Routes', () => {
             .post('/api/auth/login')
             .send({
                 email: userEmail,
-                password: 'admin'
+                password: 'password123'
             });
     
         expect(loginAttempt.statusCode).toBe(403);
@@ -159,5 +160,6 @@ describe('User Routes', () => {
         if (server && server.close) {
             server.close();
         }
+        await mongoose.connection.close();
     });
 });

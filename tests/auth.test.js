@@ -4,14 +4,16 @@ import { app, server } from '../server.js';
 describe('Auth Routes', () => {
     let token;
     let fakeToken = 'Bearer faketoken123.invalid.jwt';
+    const testEmail = `testuser_${Date.now()}_${Math.floor(Math.random()*10000)}@example.com`;
+    const testPassword = 'password123';
 
     test('Doit créer un nouvel utilisateur', async () => {
         const res = await request(app)
             .post('/api/auth/register')
             .send({
                 name: 'Test User',
-                email: `testuser${Date.now()}@example.com`,
-                password: 'password123'
+                email: testEmail,
+                password: testPassword
             });
 
         console.log("Register Response:", res.body);
@@ -24,8 +26,8 @@ describe('Auth Routes', () => {
         const res = await request(app)
             .post('/api/auth/login')
             .send({
-                email: 'testuser@example.com',
-                password: 'password123'
+                email: testEmail,
+                password: testPassword
             });
 
         token = res.body.accessToken;
@@ -74,8 +76,8 @@ describe('Auth Routes', () => {
         const loginRes = await request(app)
             .post('/api/auth/login')
             .send({
-                email: 'testuser@example.com',
-                password: 'password123'
+                email: testEmail,
+                password: testPassword
             });
     
         const accessToken = loginRes.body.accessToken;

@@ -6,6 +6,8 @@ describe('Media Routes', () => {
     let token;
     let userToken;
     let mediaId;
+    const testEmail = `testuser_${Date.now()}_${Math.floor(Math.random()*10000)}@example.com`;
+    const testPassword = 'password123';
 
     beforeAll(async () => {
         const adminLogin = await request(app)
@@ -22,15 +24,15 @@ describe('Media Routes', () => {
             .post('/api/auth/register')
             .send({
                 name: 'Test User',
-                email: `testuser${Date.now()}@example.com`,
-                password: 'password123'
+                email: testEmail,
+                password: testPassword
             });
 
         const userLogin = await request(app)
             .post('/api/auth/login')
             .send({
-                email: userRegister.body.email,
-                password: 'password123'
+                email: testEmail,
+                password: testPassword
             });
 
         userToken = userLogin.body.accessToken;
