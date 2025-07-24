@@ -38,7 +38,7 @@ npm install
 ### 4️⃣ Configuration (.env)
 Créer un fichier `.env` à la racine du projet :
 ```ini
-PORT=5000
+PORT=5001
 MONGO_URI=mongodb://localhost:27017/mediatheque
 JWT_SECRET=tonSecretJWT
 
@@ -58,7 +58,7 @@ npm run dev
 npm start
 ```
 
-L'API tourne sur `http://localhost:5000`
+L'API tourne sur `http://localhost:5001`
 
 ---
 
@@ -66,7 +66,7 @@ L'API tourne sur `http://localhost:5000`
 Swagger est activé pour documenter l'API.
 Accédez à la doc interactive sur :
 ```bash
-http://localhost:5000/api/docs
+http://localhost:1/api/docs
 ```
 
 ---
