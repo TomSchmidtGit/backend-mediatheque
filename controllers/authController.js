@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 import logger from '../config/logger.js';
 import crypto from 'crypto';
 import RefreshToken from '../models/RefreshToken.js';
+import sendWelcomeEmail from '../utils/sendMails/sendWelcomeEmail.js';
+
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
@@ -24,6 +26,10 @@ export const registerUser = async (req, res) => {
 
         if (user) {
             logger.info(`Nouvel utilisateur inscrit: ${email}`);
+
+            // Envoyer email de bienvenue
+            await sendWelcomeEmail(user);
+
             res.status(201).json({
                 _id: user._id,
                 name: user.name,

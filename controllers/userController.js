@@ -1,4 +1,6 @@
 import User from '../models/User.js';
+import { sendAccountDeactivation } from '../utils/sendMails/sendAccountDeactivation.js';
+import { sendAccountReactivation } from '../utils/sendMails/sendAccountReactivation.js';
 
 // Récupérer tous les utilisateurs (admin uniquement)
 export const getUsers = async (req, res) => {
@@ -111,6 +113,10 @@ export const deactivateUser = async (req, res) => {
       }
   
       user.actif = false;
+
+      // Envoyer email de désactivation
+      await sendAccountDeactivation(user);
+
       await user.save();
   
       res.status(200).json({ message: 'Utilisateur désactivé avec succès' });
@@ -118,3 +124,22 @@ export const deactivateUser = async (req, res) => {
       res.status(500).json({ message: err.message });
     }
   };
+
+  export const reactivateUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        if (user.actif) return res.status(400).json({ message: 'Utilisateur déjà actif' });
+
+        user.actif = true;
+        await user.save();
+
+        // Envoyer email de réactivation
+        await sendAccountReactivation(user);
+
+        res.status(200).json({ message: 'Utilisateur réactivé avec succès' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};

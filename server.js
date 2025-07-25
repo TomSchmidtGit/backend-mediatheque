@@ -14,6 +14,8 @@ import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import tagRoutes from './routes/tagRoutes.js';
 
+import { scheduleBorrowReminders } from './utils/borrowReminder.js';
+
 import swaggerDocs from './config/swaggerConfig.js';
 
 // Charger les variables d'environnement
@@ -55,6 +57,9 @@ app.use('/api/tags', tagRoutes);
 
 // Initialisation de Swagger
 swaggerDocs(app);
+
+// Planification des rappels d'emprunts
+scheduleBorrowReminders();
 
 // Route de test pour vérifier que l'API tourne
 app.get('/api/health', (req, res) => {

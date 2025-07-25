@@ -1,5 +1,7 @@
 import Borrow from '../models/Borrow.js';
 import Media from '../models/Media.js';
+import { sendBorrowConfirmation } from '../utils/sendMails/sendBorrowConfirmation.js';
+import { sendReturnConfirmation } from '../utils/sendMails/sendReturnConfirmation.js';
 
 // Emprunter un média
 export const borrowMedia = async (req, res) => {
@@ -12,6 +14,15 @@ export const borrowMedia = async (req, res) => {
 
         const borrow = new Borrow({ user, media });
         await borrow.save();
+
+        // Envoyer email de confirmation d'emprunt
+        await sendBorrowConfirmation({
+            name: req.user.name,
+            email: req.user.email,
+            title: mediaItem.title,
+            type: mediaItem.type,
+            dueDate: borrow.dueDate.toLocaleDateString()
+        });
 
         mediaItem.available = false;
         await mediaItem.save();
@@ -38,6 +49,14 @@ export const returnMedia = async (req, res) => {
             mediaItem.available = true;
             await mediaItem.save();
         }
+        
+        // Envoyer email de confirmation de retour
+        await sendReturnConfirmation({
+            name: req.user.name,
+            email: req.user.email,
+            title: mediaItem.title,
+            type: mediaItem.type
+        });
 
         res.status(200).json({ message: 'Media returned successfully' });
     } catch (error) {
