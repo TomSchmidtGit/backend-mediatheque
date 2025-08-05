@@ -12,17 +12,26 @@ export const borrowMedia = async (req, res) => {
         if (!mediaItem) return res.status(404).json({ message: 'Media not found' });
         if (!mediaItem.available) return res.status(400).json({ message: 'Media is already borrowed' });
 
-        const borrow = new Borrow({ user, media });
+        const borrow = new Borrow({ 
+            user, 
+            media,
+            // dueDate sera automatiquement calculé par le schéma
+        });
         await borrow.save();
 
-        // Envoyer email de confirmation d'emprunt
-        await sendBorrowConfirmation({
-            name: req.user.name,
-            email: req.user.email,
-            title: mediaItem.title,
-            type: mediaItem.type,
-            dueDate: borrow.dueDate.toLocaleDateString()
-        });
+        try {
+            // Envoyer email de confirmation d'emprunt
+            await sendBorrowConfirmation({
+                name: req.user.name,
+                email: req.user.email,
+                title: mediaItem.title,
+                type: mediaItem.type,
+                dueDate: borrow.dueDate.toLocaleDateString()
+            });
+        } catch (emailError) {
+            console.error('Erreur envoi email emprunt:', emailError.message);
+            // Ne pas faire échouer l'emprunt si l'email ne fonctionne pas
+        }
 
         mediaItem.available = false;
         await mediaItem.save();
@@ -50,13 +59,18 @@ export const returnMedia = async (req, res) => {
             await mediaItem.save();
         }
         
-        // Envoyer email de confirmation de retour
-        await sendReturnConfirmation({
-            name: req.user.name,
-            email: req.user.email,
-            title: mediaItem.title,
-            type: mediaItem.type
-        });
+        try {
+            // Envoyer email de confirmation de retour
+            await sendReturnConfirmation({
+                name: req.user.name,
+                email: req.user.email,
+                title: mediaItem.title,
+                type: mediaItem.type
+            });
+        } catch (emailError) {
+            console.error('Erreur envoi email retour:', emailError.message);
+            // Ne pas faire échouer le retour si l'email ne fonctionne pas
+        }
 
         res.status(200).json({ message: 'Media returned successfully' });
     } catch (error) {

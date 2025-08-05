@@ -4,20 +4,26 @@ import { accountDeactivationTemplate } from '../mailTemplates/accountDeactivatio
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS
     }
 });
 
 export const sendAccountDeactivation = async (user) => {
-    const { subject, text } = accountDeactivationTemplate({ name: user.name });
+    try {
+        const { subject, text } = accountDeactivationTemplate({ name: user.name });
 
-    const mailOptions = {
-        from: `Médiathèque <${process.env.EMAIL_USER}>`,
-        to: user.email,
-        subject,
-        text
-    };
+        const mailOptions = {
+            from: `Médiathèque <${process.env.MAIL_USER}>`,
+            to: user.email,
+            subject,
+            text
+        };
 
-    await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
+        console.log(`📧 Email de désactivation envoyé à ${user.email}`);
+    } catch (error) {
+        console.error(`❌ Erreur envoi email désactivation à ${user.email}:`, error.message);
+        throw error;
+    }
 };

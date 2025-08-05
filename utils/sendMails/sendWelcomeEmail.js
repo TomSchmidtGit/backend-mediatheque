@@ -1,17 +1,23 @@
 import transporter from '../../config/nodemailer.js';
-import dotenv from 'dotenv';
+import welcomeTemplate from '../mailTemplates/welcomeTemplate.js';
 
-dotenv.config();
+const sendWelcomeEmail = async (user) => {
+  try {
+    const { subject, text } = welcomeTemplate({ name: user.name });
 
-const sendEmail = async ({ to, subject, text }) => {
-  const mailOptions = {
-    from: `Médiathèque <${process.env.MAIL_USER}>`,
-    to,
-    subject,
-    text
-  };
+    const mailOptions = {
+      from: `Médiathèque <${process.env.MAIL_USER}>`,
+      to: user.email,
+      subject,
+      text
+    };
 
-  await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
+    console.log(`📧 Email de bienvenue envoyé à ${user.email}`);
+  } catch (error) {
+    console.error(`❌ Erreur envoi email bienvenue à ${user.email}:`, error.message);
+    throw error;
+  }
 };
 
-export default sendEmail;
+export default sendWelcomeEmail;

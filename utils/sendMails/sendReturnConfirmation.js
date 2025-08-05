@@ -4,22 +4,30 @@ import { returnConfirmationTemplate } from '../mailTemplates/returnConfirmationT
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS
     }
 });
 
-export const sendReturnConfirmation = async (user, media) => {
-    const { subject, text } = returnConfirmationTemplate({
-        name: user.name,
-        title: media.title,
-        type: media.type
-    });
+export const sendReturnConfirmation = async ({ name, email, title, type }) => {
+    try {
+        const { subject, text } = returnConfirmationTemplate({
+            name,
+            title,
+            type
+        });
 
-    await transporter.sendMail({
-        from: `"Médiathèque" <${process.env.SMTP_USER}>`,
-        to: user.email,
-        subject,
-        text
-    });
+        const mailOptions = {
+            from: `Médiathèque <${process.env.MAIL_USER}>`,
+            to: email,
+            subject,
+            text
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(`📧 Confirmation de retour envoyée à ${email}`);
+    } catch (error) {
+        console.error(`❌ Erreur envoi email retour à ${email}:`, error.message);
+        throw error;
+    }
 };

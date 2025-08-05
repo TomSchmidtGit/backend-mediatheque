@@ -4,25 +4,31 @@ import { borrowConfirmationTemplate } from '../mailTemplates/borrowConfirmationT
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS
     }
 });
 
-export const sendBorrowConfirmation = async (user, media, dueDate) => {
-    const { subject, text } = borrowConfirmationTemplate({
-        name: user.name,
-        title: media.title,
-        type: media.type,
-        dueDate
-    });
+export const sendBorrowConfirmation = async ({ name, email, title, type, dueDate }) => {
+    try {
+        const { subject, text } = borrowConfirmationTemplate({
+            name,
+            title,
+            type,
+            dueDate
+        });
 
-    const mailOptions = {
-        from: `Médiathèque <${process.env.EMAIL_USER}>`,
-        to: user.email,
-        subject,
-        text
-    };
+        const mailOptions = {
+            from: `Médiathèque <${process.env.MAIL_USER}>`,
+            to: email,
+            subject,
+            text
+        };
 
-    await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
+        console.log(`📧 Confirmation d'emprunt envoyée à ${email}`);
+    } catch (error) {
+        console.error(`❌ Erreur envoi email emprunt à ${email}:`, error.message);
+        throw error;
+    }
 };
