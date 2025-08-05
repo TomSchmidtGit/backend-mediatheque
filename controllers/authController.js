@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import logger from '../config/logger.js';
 import crypto from 'crypto';
 import RefreshToken from '../models/RefreshToken.js';
+import sendWelcomeEmail from '../utils/sendMails/sendWelcomeEmail.js';
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
@@ -24,6 +25,17 @@ export const registerUser = async (req, res) => {
 
         if (user) {
             logger.info(`Nouvel utilisateur inscrit: ${email}`);
+
+            // Envoyer email de bienvenue seulement si pas en mode test
+            if (process.env.NODE_ENV !== 'test') {
+                try {
+                    await sendWelcomeEmail(user);
+                } catch (emailError) {
+                    console.error('Erreur envoi email bienvenue:', emailError.message);
+                    // Ne pas faire échouer l'inscription si l'email ne fonctionne pas
+                }
+            }
+
             res.status(201).json({
                 _id: user._id,
                 name: user.name,
@@ -47,7 +59,7 @@ export const loginUser = async (req, res) => {
         const user = await User.findOne({ email });
         if (user && !user.actif) {
             return res.status(403).json({ message: 'Ce compte a été désactivé par un administrateur.' });
-          }          
+        }          
 
         if (!user || !(await user.matchPassword(password))) {
             return res.status(401).json({ message: 'Invalid email or password' });

@@ -15,8 +15,17 @@ const BorrowSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    dueDate: {
+        type: Date,
+        default: function() {
+            const date = new Date();
+            date.setDate(date.getDate() + 14); // 14 jours par défaut
+            return date;
+        }
+    },
     returnDate: {
-        type: Date
+        type: Date,
+        required: false // Seulement requis au moment du retour
     },
     status: {
         type: String,
