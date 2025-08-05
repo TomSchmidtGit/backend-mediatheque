@@ -13,6 +13,7 @@ import borrowRoutes from './routes/borrowRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import tagRoutes from './routes/tagRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
 
 import { scheduleBorrowReminders } from './utils/borrowReminder.js';
 
@@ -54,6 +55,7 @@ app.use('/api/borrow', borrowRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/tags', tagRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Initialisation de Swagger
 swaggerDocs(app);
