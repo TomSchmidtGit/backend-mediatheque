@@ -36,7 +36,7 @@ export const createMedia = async (req, res) => {
 export const getAllMedia = async (req, res) => {
     try {
       const { page, limit, skip } = req.pagination;
-      const { category, tags, type, search } = req.query;
+      const { category, tags, type, search, available } = req.query;
   
       const query = {};
   
@@ -61,6 +61,11 @@ export const getAllMedia = async (req, res) => {
           { description: { $regex: search, $options: 'i' } },
           { author: { $regex: search, $options: 'i' } }
         ];
+      }
+  
+      // Filtre par disponibilité
+      if (available !== undefined) {
+        query.available = available === 'true';
       }
   
       const mediaList = await Media.find(query)
@@ -103,6 +108,16 @@ export const updateMedia = async (req, res) => {
             category: req.body.category || null,
             tags: Array.isArray(req.body.tags) ? req.body.tags : []
         };
+
+        // Gérer l'upload d'image
+        if (req.file) {
+            updateData.imageUrl = req.file.path;
+        }
+
+        // Gérer la suppression d'image (si imageUrl est explicitement défini comme null ou vide)
+        if (req.body.imageUrl === null || req.body.imageUrl === '') {
+            updateData.imageUrl = null;
+        }
 
         const updatedMedia = await Media.findByIdAndUpdate(req.params.id, updateData, { new: true });
 

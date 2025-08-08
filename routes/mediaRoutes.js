@@ -205,7 +205,7 @@ router.get('/:id', getMediaById);
  *       404:
  *         description: Média non trouvé.
  */
-router.put('/:id', protect, authorizeRoles('admin'), updateMedia);
+router.put('/:id', protect, authorizeRoles('admin'), upload.single('image'), updateMedia);
 
 /**
  * @swagger
