@@ -2,28 +2,38 @@ import Borrow from '../models/Borrow.js';
 import Media from '../models/Media.js';
 import { sendBorrowConfirmation } from '../utils/sendMails/sendBorrowConfirmation.js';
 import { sendReturnConfirmation } from '../utils/sendMails/sendReturnConfirmation.js';
+import User from '../models/User.js'; // Added import for User
 
 // Emprunter un média
 export const borrowMedia = async (req, res) => {
     try {
-        const { user, media } = req.body;
+        const { userId, mediaId, dueDate } = req.body;
 
-        const mediaItem = await Media.findById(media);
+        // Vérifier que les IDs sont fournis
+        if (!userId || !mediaId) {
+            return res.status(400).json({ message: 'userId et mediaId sont requis' });
+        }
+
+        const mediaItem = await Media.findById(mediaId);
         if (!mediaItem) return res.status(404).json({ message: 'Media not found' });
         if (!mediaItem.available) return res.status(400).json({ message: 'Media is already borrowed' });
 
+        // Récupérer les informations de l'utilisateur qui emprunte
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
         const borrow = new Borrow({ 
-            user, 
-            media,
-            // dueDate sera automatiquement calculé par le schéma
+            user: userId, 
+            media: mediaId,
+            dueDate: dueDate ? new Date(dueDate) : undefined
         });
         await borrow.save();
 
         try {
-            // Envoyer email de confirmation d'emprunt
+            // Envoyer email de confirmation d'emprunt à l'utilisateur qui emprunte
             await sendBorrowConfirmation({
-                name: req.user.name,
-                email: req.user.email,
+                name: user.name,
+                email: user.email,
                 title: mediaItem.title,
                 type: mediaItem.type,
                 dueDate: borrow.dueDate.toLocaleDateString()
@@ -36,7 +46,12 @@ export const borrowMedia = async (req, res) => {
         mediaItem.available = false;
         await mediaItem.save();
 
-        res.status(201).json(borrow);
+        // Populate les données pour la réponse
+        const populatedBorrow = await Borrow.findById(borrow._id)
+            .populate('user')
+            .populate('media');
+
+        res.status(201).json(populatedBorrow);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -45,7 +60,7 @@ export const borrowMedia = async (req, res) => {
 // Retourner un média
 export const returnMedia = async (req, res) => {
     try {
-        const borrow = await Borrow.findById(req.params.id);
+        const borrow = await Borrow.findById(req.params.id).populate('user');
         if (!borrow) return res.status(404).json({ message: 'Borrow record not found' });
         if (borrow.status === 'returned') return res.status(400).json({ message: 'Media already returned' });
 
@@ -60,10 +75,10 @@ export const returnMedia = async (req, res) => {
         }
         
         try {
-            // Envoyer email de confirmation de retour
+            // Envoyer email de confirmation de retour à l'utilisateur qui a emprunté
             await sendReturnConfirmation({
-                name: req.user.name,
-                email: req.user.email,
+                name: borrow.user.name,
+                email: borrow.user.email,
                 title: mediaItem.title,
                 type: mediaItem.type
             });
@@ -141,21 +156,82 @@ export const getAllBorrows = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search;
+        const status = req.query.status;
+        const user = req.query.user;
+        const mediaType = req.query.mediaType;
 
-        const borrows = await Borrow.find()
+        // Construire les filtres de base
+        const filters = {};
+
+        // Filtre par statut
+        if (status && status !== 'all') {
+            if (status === 'overdue') {
+                // Pour les emprunts en retard, on filtre côté serveur
+                filters.status = { $ne: 'returned' };
+            } else {
+                filters.status = status;
+            }
+        }
+
+        // Récupérer les emprunts avec populate
+        let borrows = await Borrow.find(filters)
             .populate('user')
             .populate('media')
-            .sort({ borrowDate: -1 })
-            .skip((page - 1) * limit)
-            .limit(limit);
+            .sort({ borrowDate: -1 });
 
-        const total = await Borrow.countDocuments();
+        // Appliquer les filtres côté serveur après populate
+        if (search || user) {
+            const searchTerm = (search || user).toLowerCase();
+            borrows = borrows.filter(borrow => {
+                // Vérifier si l'utilisateur existe et correspond
+                if (borrow.user) {
+                    const userName = borrow.user.name?.toLowerCase() || '';
+                    const userEmail = borrow.user.email?.toLowerCase() || '';
+                    if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+                        return true;
+                    }
+                }
+                
+                // Vérifier si le média existe et correspond
+                if (borrow.media) {
+                    const mediaTitle = borrow.media.title?.toLowerCase() || '';
+                    const mediaAuthor = borrow.media.author?.toLowerCase() || '';
+                    if (mediaTitle.includes(searchTerm) || mediaAuthor.includes(searchTerm)) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            });
+        }
+
+        // Appliquer le filtre par type de média après populate
+        if (mediaType) {
+            borrows = borrows.filter(borrow => borrow.media && borrow.media.type === mediaType);
+        }
+
+        // Appliquer le filtre pour les emprunts en retard
+        if (status === 'overdue') {
+            const now = new Date();
+            borrows = borrows.filter(borrow => {
+                const dueDate = new Date(borrow.dueDate);
+                return dueDate < now && borrow.status !== 'returned';
+            });
+        }
+
+        // Pagination
+        const total = borrows.length;
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedBorrows = borrows.slice(startIndex, endIndex);
 
         res.status(200).json({
-            page,
+            data: paginatedBorrows,
+            currentPage: page,
             totalPages: Math.ceil(total / limit),
-            totalBorrows: total,
-            data: borrows
+            totalItems: total,
+            itemsPerPage: limit
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
