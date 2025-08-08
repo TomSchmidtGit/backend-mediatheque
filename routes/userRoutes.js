@@ -2,7 +2,7 @@ import express from 'express';
 import { getUsers, updateUser, getUserById, getMyProfile, updateMyProfile } from '../controllers/userController.js';
 import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
 import { toggleFavorite, getMyFavorites } from '../controllers/userController.js';
-import { deactivateUser } from '../controllers/userController.js';
+import { deactivateUser, reactivateUser } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -222,6 +222,32 @@ router.get('/', protect, authorizeRoles('admin'), getUsers);
  *         description: Utilisateur non trouvé.
  */
 router.patch('/:id/deactivate', protect, authorizeRoles('admin'), deactivateUser);
+
+/**
+ * @swagger
+ * /api/users/{id}/reactivate:
+ *   patch:
+ *     summary: Réactiver un utilisateur
+ *     description: Permet à un administrateur de réactiver un compte utilisateur désactivé.
+ *     tags: [Utilisateurs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de l'utilisateur à réactiver.
+ *     responses:
+ *       200:
+ *         description: Utilisateur réactivé avec succès.
+ *       400:
+ *         description: L'utilisateur est déjà actif.
+ *       404:
+ *         description: Utilisateur non trouvé.
+ */
+router.patch('/:id/reactivate', protect, authorizeRoles('admin'), reactivateUser);
 
 /**
  * @swagger
