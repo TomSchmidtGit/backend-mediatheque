@@ -5,8 +5,54 @@ import { sendAccountReactivation } from '../utils/sendMails/sendAccountReactivat
 // Récupérer tous les utilisateurs (admin uniquement)
 export const getUsers = async (req, res) => {
     try {
-        const users = await User.find().select('-password'); // ⚠️ Exclure les mots de passe
-        res.status(200).json(users);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+        
+        // Construire les filtres
+        const filters = {};
+        
+        // Filtre par recherche (nom ou email)
+        if (req.query.search) {
+            filters.$or = [
+                { name: { $regex: req.query.search, $options: 'i' } },
+                { email: { $regex: req.query.search, $options: 'i' } }
+            ];
+        }
+        
+        // Filtre par rôle
+        if (req.query.role) {
+            filters.role = req.query.role;
+        }
+        
+        // Filtre par statut
+        if (req.query.status) {
+            if (req.query.status === 'active') {
+                filters.actif = true;
+            } else if (req.query.status === 'inactive') {
+                filters.actif = false;
+            }
+        }
+        
+        // Compter le total
+        const totalItems = await User.countDocuments(filters);
+        
+        // Récupérer les utilisateurs avec pagination
+        const users = await User.find(filters)
+            .select('-password')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+        
+        const totalPages = Math.ceil(totalItems / limit);
+        
+        res.status(200).json({
+            data: users,
+            currentPage: page,
+            totalPages,
+            totalItems,
+            itemsPerPage: limit
+        });
     } catch (error) {
         res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
