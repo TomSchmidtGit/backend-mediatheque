@@ -35,7 +35,7 @@ const router = express.Router();
  *       400:
  *         description: Média déjà emprunté
  */
-router.post('/', protect, borrowMedia);
+router.post('/', protect, authorizeRoles('admin'), borrowMedia);
 
 /**
  * @swagger
