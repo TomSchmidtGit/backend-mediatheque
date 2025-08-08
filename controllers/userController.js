@@ -143,3 +143,75 @@ export const deactivateUser = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+// Récupérer ses propres informations
+export const getMyProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+            .select('-password')
+            .populate('favorites', 'title type author imageUrl');
+        
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};
+
+// Récupérer un utilisateur par ID (admin uniquement)
+export const getUserById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+            .select('-password')
+            .populate('favorites', 'title type author imageUrl');
+        
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};
+
+// Modifier ses propres informations
+export const updateMyProfile = async (req, res) => {
+    try {
+        const { name, email } = req.body;
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        // Vérifier si l'email existe déjà (sauf pour l'utilisateur actuel)
+        if (email && email !== user.email) {
+            const existingUser = await User.findOne({ email, _id: { $ne: req.user._id } });
+            if (existingUser) {
+                return res.status(400).json({ message: 'Cet email est déjà utilisé' });
+            }
+        }
+
+        // Mise à jour des champs
+        if (name) user.name = name;
+        if (email) user.email = email;
+        // Note: On ne permet pas à l'utilisateur de changer son propre rôle
+
+        const updatedUser = await user.save();
+        
+        res.json({
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            actif: updatedUser.actif,
+            createdAt: updatedUser.createdAt
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
