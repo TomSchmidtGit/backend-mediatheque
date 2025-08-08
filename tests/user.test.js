@@ -82,6 +82,15 @@ describe('User Routes', () => {
         expect(res.body.message).toBe('Accès interdit');
     });
 
+    test('Un utilisateur peut récupérer ses propres infos', async () => {
+        const res = await request(app)
+          .get('/api/users/me')
+          .set('Authorization', `Bearer ${userToken}`);
+        
+        expect(res.statusCode).toBe(200);
+        expect(res.body.email).toBe(testEmail);
+      });
+
     test('Un admin peut modifier un utilisateur', async () => {
         const res = await request(app)
             .put(`/api/users/${userId}`)
