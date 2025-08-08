@@ -64,7 +64,7 @@ export const getAllMedia = async (req, res) => {
       }
   
       const mediaList = await Media.find(query)
-        .select('title type year author imageUrl averageRating category tags')
+        .select('title type year author imageUrl averageRating category tags available')
         .skip(skip)
         .limit(limit)
         .lean();
