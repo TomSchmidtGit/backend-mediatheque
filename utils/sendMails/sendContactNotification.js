@@ -24,7 +24,7 @@ export const sendContactNotification = async (contactData) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`📧 Notification de contact envoyée pour : ${contactData.subject}`);
+      
     } catch (error) {
         console.error(`❌ Erreur envoi notification contact:`, error.message);
         throw error;

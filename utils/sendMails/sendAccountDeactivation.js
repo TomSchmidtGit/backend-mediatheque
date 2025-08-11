@@ -21,7 +21,7 @@ export const sendAccountDeactivation = async (user) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`📧 Email de désactivation envoyé à ${user.email}`);
+      
     } catch (error) {
         console.error(`❌ Erreur envoi email désactivation à ${user.email}:`, error.message);
         throw error;

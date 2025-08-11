@@ -4,8 +4,7 @@ import Borrow from '../models/Borrow.js';
 // Ajouter un média avec upload d'image
 export const createMedia = async (req, res) => {
     try {
-        console.log("📝 Données reçues :", req.body);
-        console.log("📸 Fichier reçu :", req.file ? req.file.path : "Aucune image reçue");
+        
 
         const { title, type, author, year, description, category, tags } = req.body;
 
@@ -158,7 +157,7 @@ export const deleteMedia = async (req, res) => {
 
         // Supprimer tous les emprunts liés à ce média (même ceux retournés)
         const deletedBorrows = await Borrow.deleteMany({ media: mediaId });
-        console.log(`🗑️ ${deletedBorrows.deletedCount} emprunt(s) supprimé(s) pour le média ${mediaId}`);
+
 
         // Supprimer le média
         const deletedMedia = await Media.findByIdAndDelete(mediaId);

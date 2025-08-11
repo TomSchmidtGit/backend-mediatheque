@@ -307,8 +307,7 @@ router.post('/:id/reviews', protect, addReview);
 router.put('/:id/reviews', protect, updateReview);
 
 router.post('/test-upload', upload.single('image'), (req, res) => {
-    console.log("📝 Données reçues :", req.body);
-    console.log("📸 Fichier reçu :", req.file ? req.file.path : "Aucune image reçue");
+
 
     if (!req.file) {
         return res.status(400).json({ message: "L'image n'a pas été reçue par multer" });

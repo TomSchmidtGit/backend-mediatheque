@@ -25,7 +25,7 @@ export const sendReturnConfirmation = async ({ name, email, title, type }) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`📧 Confirmation de retour envoyée à ${email}`);
+      
     } catch (error) {
         console.error(`❌ Erreur envoi email retour à ${email}:`, error.message);
         throw error;

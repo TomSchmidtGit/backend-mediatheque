@@ -23,7 +23,7 @@ export const sendContactConfirmation = async (contactData) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`📧 Confirmation de contact envoyée à : ${contactData.email}`);
+      
     } catch (error) {
         console.error(`❌ Erreur envoi confirmation contact à ${contactData.email}:`, error.message);
         throw error;

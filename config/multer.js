@@ -13,7 +13,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({
     storage,
     fileFilter: (req, file, cb) => {
-        console.log("📂 Image interceptée par Multer :", file?.originalname || "Aucune image reçue");
+      
         cb(null, true);
     }
 });
