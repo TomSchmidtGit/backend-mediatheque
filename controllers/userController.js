@@ -190,6 +190,48 @@ export const deactivateUser = async (req, res) => {
     }
 };
 
+// Désactiver son propre compte
+export const deactivateMyAccount = async (req, res) => {
+    try {
+        const { password } = req.body;
+        
+        if (!password) {
+            return res.status(400).json({ message: 'Mot de passe requis' });
+        }
+
+        const user = await User.findById(req.user._id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        if (!user.actif) {
+            return res.status(400).json({ message: 'Compte déjà désactivé' });
+        }
+
+        // Vérifier le mot de passe
+        const isPasswordValid = await user.matchPassword(password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: 'Mot de passe incorrect' });
+        }
+
+        // Désactiver le compte
+        user.actif = false;
+        await user.save();
+
+        // Envoyer email de désactivation
+        await sendAccountDeactivation(user);
+
+        // Supprimer tous les refresh tokens (déconnexion forcée)
+        const RefreshToken = (await import('../models/RefreshToken.js')).default;
+        await RefreshToken.deleteMany({ user: user._id });
+
+        res.status(200).json({ message: 'Compte désactivé avec succès' });
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    }
+};
+
 // Récupérer ses propres informations
 export const getMyProfile = async (req, res) => {
     try {

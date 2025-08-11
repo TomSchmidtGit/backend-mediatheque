@@ -2,7 +2,7 @@ import express from 'express';
 import { getUsers, updateUser, getUserById, getMyProfile, updateMyProfile } from '../controllers/userController.js';
 import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
 import { toggleFavorite, getMyFavorites } from '../controllers/userController.js';
-import { deactivateUser, reactivateUser } from '../controllers/userController.js';
+import { deactivateUser, reactivateUser, deactivateMyAccount } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -113,6 +113,34 @@ router.get('/me', protect, getMyProfile);
  *         description: Utilisateur non trouvé
  */
 router.put('/me', protect, updateMyProfile);
+
+/**
+ * @swagger
+ * /api/users/me/deactivate:
+ *   patch:
+ *     summary: Désactiver son propre compte
+ *     tags: [Utilisateurs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: Mot de passe actuel pour confirmation
+ *     responses:
+ *       200:
+ *         description: Compte désactivé avec succès
+ *       400:
+ *         description: Mot de passe incorrect
+ *       401:
+ *         description: Non autorisé
+ */
+router.patch('/me/deactivate', protect, deactivateMyAccount);
 
 /**
  * @swagger
