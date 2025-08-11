@@ -131,20 +131,66 @@ export const getMyBorrows = async (req, res) => {
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
+        const status = req.query.status;
+        const mediaType = req.query.mediaType;
+        const search = req.query.search;
 
-        const borrows = await Borrow.find({ user: userId })
+        // Construire les filtres de base
+        const filters = { user: userId };
+
+        // Filtre par statut
+        if (status && status !== 'all') {
+            if (status === 'overdue') {
+                // Pour les emprunts en retard, on filtre côté serveur
+                filters.status = { $ne: 'returned' };
+            } else {
+                filters.status = status;
+            }
+        }
+
+        // Récupérer les emprunts avec populate
+        let borrows = await Borrow.find(filters)
             .populate('media')
-            .sort({ borrowDate: -1 })
-            .skip((page - 1) * limit)
-            .limit(limit);
+            .sort({ borrowDate: -1 });
 
-        const total = await Borrow.countDocuments({ user: userId });
+        // Appliquer le filtre par type de média après populate
+        if (mediaType) {
+            borrows = borrows.filter(borrow => borrow.media && borrow.media.type === mediaType);
+        }
+
+        // Appliquer la recherche textuelle
+        if (search) {
+            const searchTerm = search.toLowerCase();
+            borrows = borrows.filter(borrow => {
+                if (borrow.media) {
+                    const mediaTitle = borrow.media.title?.toLowerCase() || '';
+                    const mediaAuthor = borrow.media.author?.toLowerCase() || '';
+                    return mediaTitle.includes(searchTerm) || mediaAuthor.includes(searchTerm);
+                }
+                return false;
+            });
+        }
+
+        // Appliquer le filtre pour les emprunts en retard
+        if (status === 'overdue') {
+            const now = new Date();
+            borrows = borrows.filter(borrow => {
+                const dueDate = new Date(borrow.dueDate);
+                return dueDate < now && borrow.status !== 'returned';
+            });
+        }
+
+        // Pagination
+        const total = borrows.length;
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedBorrows = borrows.slice(startIndex, endIndex);
 
         res.status(200).json({
             page,
             totalPages: Math.ceil(total / limit),
-            totalBorrows: total,
-            data: borrows
+            totalItems: total,
+            data: paginatedBorrows
         });
     } catch (error) {
         res.status(500).json({ message: 'Erreur lors de la récupération de vos emprunts' });
