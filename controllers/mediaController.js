@@ -1,4 +1,5 @@
 import Media from '../models/Media.js';
+import Borrow from '../models/Borrow.js';
 
 // Ajouter un média avec upload d'image
 export const createMedia = async (req, res) => {
@@ -134,12 +135,41 @@ export const updateMedia = async (req, res) => {
 // Supprimer un média
 export const deleteMedia = async (req, res) => {
     try {
-        const media = await Media.findByIdAndDelete(req.params.id);
+        const mediaId = req.params.id;
+        
+        // Vérifier si le média existe
+        const media = await Media.findById(mediaId);
         if (!media) {
             return res.status(404).json({ message: 'Média non trouvé' });
         }
-        res.status(200).json({ message: 'Média supprimé avec succès' });
+
+        // Vérifier s'il y a des emprunts actifs (non retournés) pour ce média
+        const activeBorrows = await Borrow.find({ 
+            media: mediaId, 
+            status: { $ne: 'returned' } 
+        });
+
+        if (activeBorrows.length > 0) {
+            return res.status(400).json({ 
+                message: `Impossible de supprimer ce média car il a ${activeBorrows.length} emprunt(s) actif(s). Veuillez d'abord traiter ces emprunts.`,
+                activeBorrowsCount: activeBorrows.length
+            });
+        }
+
+        // Supprimer tous les emprunts liés à ce média (même ceux retournés)
+        const deletedBorrows = await Borrow.deleteMany({ media: mediaId });
+        console.log(`🗑️ ${deletedBorrows.deletedCount} emprunt(s) supprimé(s) pour le média ${mediaId}`);
+
+        // Supprimer le média
+        const deletedMedia = await Media.findByIdAndDelete(mediaId);
+        
+        res.status(200).json({ 
+            message: 'Média supprimé avec succès',
+            deletedMedia: deletedMedia,
+            deletedBorrowsCount: deletedBorrows.deletedCount
+        });
     } catch (error) {
+        console.error('Erreur lors de la suppression du média:', error);
         res.status(500).json({ error: error.message });
     }
 };

@@ -223,6 +223,106 @@ describe('Media Routes', () => {
         expect(res.statusCode).toBe(200);
     });
 
+    test('Supprimer un média avec des emprunts retournés', async () => {
+        // Créer un nouveau média pour ce test
+        const newMediaRes = await request(app)
+            .post('/api/media')
+            .set('Authorization', `Bearer ${token}`)
+            .field('title', 'Test Media for Borrows')
+            .field('type', 'book')
+            .field('author', 'Test Author')
+            .field('year', 2024)
+            .field('description', 'Test description')
+            .attach('image', 'tests/files/test-image.jpg');
+
+        const newMediaId = newMediaRes.body._id;
+        expect(newMediaId).toBeDefined();
+
+        // Récupérer l'ID utilisateur à partir du token
+        const userResponse = await request(app)
+            .get('/api/users/me')
+            .set('Authorization', `Bearer ${userToken}`);
+        
+        const userId = userResponse.body._id;
+
+        // Créer un emprunt pour ce média
+        const borrowRes = await request(app)
+            .post('/api/borrow')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                userId: userId,
+                mediaId: newMediaId
+            });
+
+        // Marquer l'emprunt comme retourné
+        if (borrowRes.body._id) {
+            await request(app)
+                .put(`/api/borrow/${borrowRes.body._id}/return`)
+                .set('Authorization', `Bearer ${token}`);
+        }
+
+        // Maintenant supprimer le média
+        const res = await request(app)
+            .delete(`/api/media/${newMediaId}`)
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.message).toBe('Média supprimé avec succès');
+        expect(res.body.deletedBorrowsCount).toBeGreaterThan(0);
+    });
+
+    test('Empêcher la suppression d\'un média avec des emprunts actifs', async () => {
+        // Créer un nouveau média pour ce test
+        const newMediaRes = await request(app)
+            .post('/api/media')
+            .set('Authorization', `Bearer ${token}`)
+            .field('title', 'Test Media for Active Borrows')
+            .field('type', 'book')
+            .field('author', 'Test Author')
+            .field('year', 2024)
+            .field('description', 'Test description')
+            .attach('image', 'tests/files/test-image.jpg');
+
+        const newMediaId = newMediaRes.body._id;
+        expect(newMediaId).toBeDefined();
+
+        // Récupérer l'ID utilisateur à partir du token
+        const userResponse = await request(app)
+            .get('/api/users/me')
+            .set('Authorization', `Bearer ${userToken}`);
+        
+        const userId = userResponse.body._id;
+
+        // Créer un emprunt actif (non retourné)
+        const borrowRes = await request(app)
+            .post('/api/borrow')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                userId: userId,
+                mediaId: newMediaId
+            });
+
+        // Essayer de supprimer le média (devrait échouer)
+        const res = await request(app)
+            .delete(`/api/media/${newMediaId}`)
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.message).toContain('Impossible de supprimer ce média car il a');
+        expect(res.body.activeBorrowsCount).toBeGreaterThan(0);
+
+        // Nettoyer - marquer l'emprunt comme retourné puis supprimer le média
+        if (borrowRes.body._id) {
+            await request(app)
+                .put(`/api/borrow/${borrowRes.body._id}/return`)
+                .set('Authorization', `Bearer ${token}`);
+        }
+
+        await request(app)
+            .delete(`/api/media/${newMediaId}`)
+            .set('Authorization', `Bearer ${token}`);
+    });
+
     test('Vérifier si l’image est bien envoyée seule', async () => {
         const res = await request(app)
             .post('/api/media/test-upload')
