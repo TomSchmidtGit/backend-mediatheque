@@ -18,7 +18,7 @@ export const sendLateReminder = async ({ user, media, dueDate }) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`📧 Rappel de retard envoyé à ${user.email}`);
+      
     } catch (error) {
         console.error(`❌ Erreur envoi email retard à ${user.email}:`, error.message);
         throw error;

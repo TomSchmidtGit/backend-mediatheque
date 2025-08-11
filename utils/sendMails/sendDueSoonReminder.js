@@ -18,7 +18,7 @@ export const sendDueSoonReminder = async ({ user, media, dueDate }) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`📧 Rappel d'échéance envoyé à ${user.email}`);
+      
     } catch (error) {
         console.error(`❌ Erreur envoi email rappel à ${user.email}:`, error.message);
         throw error;

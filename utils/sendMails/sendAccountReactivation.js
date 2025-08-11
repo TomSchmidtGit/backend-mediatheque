@@ -21,7 +21,7 @@ export const sendAccountReactivation = async (user) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`📧 Email de réactivation envoyé à ${user.email}`);
+      
     } catch (error) {
         console.error(`❌ Erreur envoi email réactivation à ${user.email}:`, error.message);
         throw error;

@@ -13,7 +13,7 @@ const sendWelcomeEmail = async (user) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`📧 Email de bienvenue envoyé à ${user.email}`);
+  
   } catch (error) {
     console.error(`❌ Erreur envoi email bienvenue à ${user.email}:`, error.message);
     throw error;
