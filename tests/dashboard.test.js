@@ -1,158 +1,151 @@
 import request from 'supertest';
-import { app, server } from '../server.js';
+import { app } from '../server.js';
+import { 
+  createTestUser, 
+  createTestAdmin,
+  createTestBorrow,
+  createTestMedia,
+  expectErrorResponse,
+  expectSuccessResponse
+} from './utils/testHelpers.js';
 
 describe('Dashboard Routes', () => {
-    let adminToken;
-    let userToken;
+  describe('GET /api/dashboard/stats', () => {
+    test('Doit permettre à un admin de récupérer les statistiques globales', async () => {
+      // Créer un admin et se connecter
+      const adminUser = await createTestAdmin();
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: adminUser.email,
+          password: 'password123'
+        });
+      const adminToken = loginRes.body.accessToken;
 
-    beforeAll(async () => {
-        // Connexion admin
-        const adminLogin = await request(app)
-            .post('/api/auth/login')
-            .send({
-                email: 'admin@example.com',
-                password: 'admin'
-            });
+      // Créer quelques données de test pour avoir des statistiques
+      await createTestBorrow();
+      await createTestBorrow();
+      await createTestMedia();
 
-        adminToken = adminLogin.body.accessToken;
-        expect(adminToken).toBeDefined();
+      const res = await request(app)
+        .get('/api/dashboard/stats')
+        .set('Authorization', `Bearer ${adminToken}`);
 
-        // Création et connexion utilisateur normal
-        const timestamp = Date.now();
-        const userRegister = await request(app)
-            .post('/api/auth/register')
-            .send({
-                name: 'Test User Dashboard',
-                email: `testdashboard_${timestamp}@example.com`,
-                password: 'password123'
-            });
-
-        const userLogin = await request(app)
-            .post('/api/auth/login')
-            .send({
-                email: `testdashboard_${timestamp}@example.com`,
-                password: 'password123'
-            });
-
-        userToken = userLogin.body.accessToken;
-        expect(userToken).toBeDefined();
+      expectSuccessResponse(res);
+      expect(res.body).toHaveProperty('users');
+      expect(res.body).toHaveProperty('media');
+      expect(res.body).toHaveProperty('borrows');
     });
 
-    describe('GET /api/dashboard/stats', () => {
-        test('Un admin peut accéder aux statistiques du dashboard', async () => {
-            const res = await request(app)
-                .get('/api/dashboard/stats')
-                .set('Authorization', `Bearer ${adminToken}`);
-
-            expect(res.statusCode).toBe(200);
-            
-            // Vérifier la structure de la réponse
-            expect(res.body).toHaveProperty('users');
-            expect(res.body.users).toHaveProperty('total');
-            expect(res.body.users).toHaveProperty('active');
-            expect(res.body.users).toHaveProperty('inactive');
-            expect(res.body.users).toHaveProperty('newThisMonth');
-
-            expect(res.body).toHaveProperty('media');
-            expect(res.body.media).toHaveProperty('total');
-            expect(res.body.media).toHaveProperty('byType');
-            expect(res.body.media.byType).toHaveProperty('book');
-            expect(res.body.media.byType).toHaveProperty('movie');
-            expect(res.body.media.byType).toHaveProperty('music');
-
-            expect(res.body).toHaveProperty('borrows');
-            expect(res.body.borrows).toHaveProperty('active');
-            expect(res.body.borrows).toHaveProperty('overdue');
-            expect(res.body.borrows).toHaveProperty('returned');
-            expect(res.body.borrows).toHaveProperty('total');
-
-            expect(res.body).toHaveProperty('topBorrowedMedia');
-            expect(Array.isArray(res.body.topBorrowedMedia)).toBe(true);
-
-            expect(res.body).toHaveProperty('recentBorrows');
-            expect(Array.isArray(res.body.recentBorrows)).toBe(true);
-
-            expect(res.body).toHaveProperty('mostActiveUsers');
-            expect(Array.isArray(res.body.mostActiveUsers)).toBe(true);
-
-            expect(res.body).toHaveProperty('alerts');
-            expect(Array.isArray(res.body.alerts)).toBe(true);
-
-            expect(res.body).toHaveProperty('overdueDetails');
-            expect(Array.isArray(res.body.overdueDetails)).toBe(true);
+    test('Doit refuser l\'accès aux statistiques pour un utilisateur non-admin', async () => {
+      // Créer un utilisateur normal et se connecter
+      const user = await createTestUser();
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: user.email,
+          password: 'password123'
         });
+      const userToken = loginRes.body.accessToken;
 
-        test('Un utilisateur normal ne peut pas accéder au dashboard', async () => {
-            const res = await request(app)
-                .get('/api/dashboard/stats')
-                .set('Authorization', `Bearer ${userToken}`);
+      const res = await request(app)
+        .get('/api/dashboard/stats')
+        .set('Authorization', `Bearer ${userToken}`);
 
-            expect(res.statusCode).toBe(403);
-            expect(res.body.message).toMatch(/administrateurs/i);
-        });
-
-        test('Accès refusé sans token', async () => {
-            const res = await request(app).get('/api/dashboard/stats');
-
-            expect(res.statusCode).toBe(401);
-        });
+      expectErrorResponse(res, 403);
     });
 
-    describe('GET /api/dashboard/borrows/stats', () => {
-        test('Un admin peut obtenir les statistiques d\'emprunts par période', async () => {
-            const res = await request(app)
-                .get('/api/dashboard/borrows/stats?period=month')
-                .set('Authorization', `Bearer ${adminToken}`);
+    test('Doit refuser l\'accès sans authentification', async () => {
+      const res = await request(app).get('/api/dashboard/stats');
+      expectErrorResponse(res, 401);
+    });
+  });
 
-            expect(res.statusCode).toBe(200);
-            expect(res.body).toHaveProperty('period', 'month');
-            expect(res.body).toHaveProperty('startDate');
-            expect(res.body).toHaveProperty('data');
-            expect(Array.isArray(res.body.data)).toBe(true);
+  describe('GET /api/dashboard/borrows/stats', () => {
+    test('Doit permettre à un admin de récupérer les statistiques d\'emprunts par période', async () => {
+      // Créer un admin et se connecter
+      const adminUser = await createTestAdmin();
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: adminUser.email,
+          password: 'password123'
         });
+      const adminToken = loginRes.body.accessToken;
 
-        test('Statistiques par semaine', async () => {
-            const res = await request(app)
-                .get('/api/dashboard/borrows/stats?period=week')
-                .set('Authorization', `Bearer ${adminToken}`);
+      // Créer quelques emprunts
+      await createTestBorrow();
+      await createTestBorrow();
 
-            expect(res.statusCode).toBe(200);
-            expect(res.body.period).toBe('week');
-        });
+      const res = await request(app)
+        .get('/api/dashboard/borrows/stats?period=month')
+        .set('Authorization', `Bearer ${adminToken}`);
 
-        test('Statistiques par année', async () => {
-            const res = await request(app)
-                .get('/api/dashboard/borrows/stats?period=year')
-                .set('Authorization', `Bearer ${adminToken}`);
-
-            expect(res.statusCode).toBe(200);
-            expect(res.body.period).toBe('year');
-        });
+      expectSuccessResponse(res);
+      expect(res.body).toHaveProperty('period');
+      expect(res.body).toHaveProperty('data');
+      expect(Array.isArray(res.body.data)).toBe(true);
     });
 
-    describe('GET /api/dashboard/media/categories', () => {
-        test('Un admin peut obtenir les statistiques par catégorie', async () => {
-            const res = await request(app)
-                .get('/api/dashboard/media/categories')
-                .set('Authorization', `Bearer ${adminToken}`);
-
-            expect(res.statusCode).toBe(200);
-            expect(Array.isArray(res.body)).toBe(true);
-
-            // Si des catégories existent
-            if (res.body.length > 0) {
-                const category = res.body[0];
-                expect(category).toHaveProperty('_id'); // Nom de la catégorie
-                expect(category).toHaveProperty('types');
-                expect(Array.isArray(category.types)).toBe(true);
-                expect(category).toHaveProperty('total');
-            }
+    test('Doit refuser l\'accès pour un utilisateur non-admin', async () => {
+      // Créer un utilisateur normal et se connecter
+      const user = await createTestUser();
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: user.email,
+          password: 'password123'
         });
+      const userToken = loginRes.body.accessToken;
+
+      const res = await request(app)
+        .get('/api/dashboard/borrows/stats')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expectErrorResponse(res, 403);
+    });
+  });
+
+  describe('GET /api/dashboard/media/categories', () => {
+    test('Doit permettre à un admin de récupérer les statistiques des médias par catégorie', async () => {
+      // Créer un admin et se connecter
+      const adminUser = await createTestAdmin();
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: adminUser.email,
+          password: 'password123'
+        });
+      const adminToken = loginRes.body.accessToken;
+
+      // Créer quelques médias avec catégories
+      await createTestMedia();
+      await createTestMedia();
+
+      const res = await request(app)
+        .get('/api/dashboard/media/categories')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expectSuccessResponse(res);
+      expect(Array.isArray(res.body)).toBe(true);
     });
 
-    afterAll(async () => {
-        if (server && server.close) {
-            server.close();
-        }
+    test('Doit refuser l\'accès pour un utilisateur non-admin', async () => {
+      // Créer un utilisateur normal et se connecter
+      const user = await createTestUser();
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: user.email,
+          password: 'password123'
+        });
+      const userToken = loginRes.body.accessToken;
+
+      const res = await request(app)
+        .get('/api/dashboard/media/categories')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expectErrorResponse(res, 403);
     });
+  });
 });

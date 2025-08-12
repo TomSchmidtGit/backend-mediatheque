@@ -23,8 +23,10 @@ import swaggerDocs from './config/swaggerConfig.js';
 // Charger les variables d'environnement
 dotenv.config();
 
-// Connexion à la base de données
-connectDB();
+// Connexion à la base de données (uniquement en production/dev)
+if (process.env.NODE_ENV !== 'test') {
+    connectDB();
+}
 
 // Initialisation de l'application Express
 const app = express();
@@ -62,8 +64,10 @@ app.use('/api/contact', contactRoutes);
 // Initialisation de Swagger
 swaggerDocs(app);
 
-// Planification des rappels d'emprunts
-scheduleBorrowReminders();
+// Planification des rappels d'emprunts (uniquement en production/dev)
+if (process.env.NODE_ENV !== 'test') {
+    scheduleBorrowReminders();
+}
 
 // Route de test pour vérifier que l'API tourne
 app.get('/api/health', (req, res) => {

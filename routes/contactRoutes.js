@@ -9,8 +9,8 @@ const router = express.Router();
 
 // Rate limiter spécifique pour le contact (éviter le spam)
 const contactRateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 3, // 3 messages max par IP toutes les 15 minutes
+    windowMs: process.env.NODE_ENV === 'test' ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1 minute en test, 15 en prod
+    max: process.env.NODE_ENV === 'test' ? 100 : 3, // 100 messages max en test, 3 en prod
     message: {
         message: "Trop de messages envoyés. Veuillez attendre 15 minutes avant de renvoyer un message."
     },
