@@ -12,7 +12,10 @@
     "test:coverage": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.js --coverage --runInBand --forceExit",
     "test:ci": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.js --ci --coverage --runInBand --forceExit",
     "test:debug": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.js --inspect-brk --runInBand",
-    "test:fix": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.js --runInBand --forceExit --verbose --detectOpenHandles"
+    "test:fix": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.js --runInBand --forceExit --verbose --detectOpenHandles",
+    "seed": "node scripts/seedTestData.js",
+    "seed:dev": "NODE_ENV=development node scripts/seedTestData.js",
+    "seed:prod": "NODE_ENV=production node scripts/seedProductionData.js"
   },
   "keywords": [],
   "author": "",

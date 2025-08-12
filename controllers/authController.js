@@ -199,15 +199,19 @@ export const requestPasswordReset = async (req, res) => {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
         const resetLink = `${frontendUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(user.email)}`;
 
-        // Envoyer l'email de réinitialisation
-        try {
-            await sendPasswordResetEmail(user, resetLink);
-            logger.info(`Email de réinitialisation de mot de passe envoyé à ${email}`);
-        } catch (emailError) {
-            logger.error(`Erreur lors de l'envoi de l'email de réinitialisation: ${emailError.message}`);
-            // Supprimer le token si l'email n'a pas pu être envoyé
-            await PasswordResetToken.deleteMany({ email: user.email });
-            return res.status(500).json({ message: 'Erreur lors de l\'envoi de l\'email' });
+        // Envoyer l'email de réinitialisation (sauf en mode test)
+        if (process.env.NODE_ENV !== 'test') {
+            try {
+                await sendPasswordResetEmail(user, resetLink);
+                logger.info(`Email de réinitialisation de mot de passe envoyé à ${email}`);
+            } catch (emailError) {
+                logger.error(`Erreur lors de l'envoi de l'email de réinitialisation: ${emailError.message}`);
+                // Supprimer le token si l'email n'a pas pu être envoyé
+                await PasswordResetToken.deleteMany({ email: user.email });
+                return res.status(500).json({ message: 'Erreur lors de l\'envoi de l\'email' });
+            }
+        } else {
+            logger.info(`Mode test: Email de réinitialisation simulé pour ${email}`);
         }
 
         res.status(200).json({ 
