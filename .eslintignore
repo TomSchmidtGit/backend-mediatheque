@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Coverage
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env*
+
+# Test files (optional - uncomment if you want to exclude them)
+# tests/
+
+# Generated files
+*.min.js
+*.bundle.js
+
+# Documentation
+docs/
+
+# Scripts
+scripts/
