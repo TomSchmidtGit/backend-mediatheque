@@ -35,7 +35,21 @@ const PORT = process.env.PORT || 5001;
 // Middlewares globaux
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+// Configuration CORS pour la production
+const corsOptions = {
+  origin:
+    process.env.NODE_ENV === 'production'
+      ? [
+          'https://frontend-mediatheque.vercel.app',
+          'https://frontend-mediatheque-git-main.vercel.app', // Domaine de preview
+          'https://frontend-mediatheque-git-dev.vercel.app', // Domaine de développement
+        ]
+      : true, // En développement, autoriser tout
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(morgan('dev'));
 
