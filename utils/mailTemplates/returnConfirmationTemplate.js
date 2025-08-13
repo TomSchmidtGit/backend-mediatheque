@@ -1,8 +1,8 @@
 import { translateType } from './typeTranslations.js';
 
 export const returnConfirmationTemplate = ({ name, title, type }) => ({
-    subject: '📦 Média retourné avec succès',
-    text: `Bonjour ${name},
+  subject: '📦 Média retourné avec succès',
+  text: `Bonjour ${name},
 
 Nous confirmons la réception du média suivant :
 
@@ -11,5 +11,5 @@ Nous confirmons la réception du média suivant :
 
 Merci pour votre ponctualité !
 
-L'équipe Médiathèque`
+L'équipe Médiathèque`,
 });

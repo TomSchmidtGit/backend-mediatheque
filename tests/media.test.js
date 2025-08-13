@@ -1,13 +1,13 @@
 import request from 'supertest';
 import { app } from '../server.js';
-import { 
-  createTestUser, 
+import {
+  createTestUser,
   createTestAdmin,
   createTestMedia,
   createTestCategory,
   createTestTag,
   expectErrorResponse,
-  expectSuccessResponse
+  expectSuccessResponse,
 } from './utils/testHelpers.js';
 
 describe('Media Routes', () => {
@@ -15,12 +15,10 @@ describe('Media Routes', () => {
     test('Doit créer un nouveau média avec des données valides', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer une catégorie et des tags pour le média
@@ -35,7 +33,7 @@ describe('Media Routes', () => {
         year: '2023',
         description: 'Test description',
         category: category._id.toString(),
-        tags: [tag1._id.toString(), tag2._id.toString()]
+        tags: [tag1._id.toString(), tag2._id.toString()],
       };
 
       const res = await request(app)
@@ -69,19 +67,17 @@ describe('Media Routes', () => {
     test('Doit refuser la création par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const mediaData = {
         title: 'Test Media Title',
         type: 'book',
         author: 'Test Author',
-        year: '2023'
+        year: '2023',
       };
 
       const res = await request(app)
@@ -101,7 +97,7 @@ describe('Media Routes', () => {
         title: 'Test Media Title',
         type: 'book',
         author: 'Test Author',
-        year: '2023'
+        year: '2023',
       };
 
       const res = await request(app)
@@ -118,12 +114,10 @@ describe('Media Routes', () => {
     test('Doit valider les données obligatoires', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Test sans titre
@@ -221,8 +215,7 @@ describe('Media Routes', () => {
       await createTestMedia();
       await createTestMedia();
 
-      const res = await request(app)
-        .get('/api/media?page=1&limit=2');
+      const res = await request(app).get('/api/media?page=1&limit=2');
 
       expectSuccessResponse(res);
       expect(res.body).toHaveProperty('data');
@@ -235,8 +228,7 @@ describe('Media Routes', () => {
       await createTestMedia({ type: 'book' });
       await createTestMedia({ type: 'movie' });
 
-      const res = await request(app)
-        .get('/api/media?type=book');
+      const res = await request(app).get('/api/media?type=book');
 
       expectSuccessResponse(res);
       expect(res.body).toHaveProperty('data');
@@ -252,8 +244,7 @@ describe('Media Routes', () => {
       await createTestMedia({ category: category._id });
       await createTestMedia({ category: category._id });
 
-      const res = await request(app)
-        .get(`/api/media?category=${category._id}`);
+      const res = await request(app).get(`/api/media?category=${category._id}`);
 
       expectSuccessResponse(res);
       expect(res.body).toHaveProperty('data');
@@ -268,8 +259,7 @@ describe('Media Routes', () => {
       await createTestMedia({ available: true });
       await createTestMedia({ available: false });
 
-      const res = await request(app)
-        .get('/api/media?available=true');
+      const res = await request(app).get('/api/media?available=true');
 
       expectSuccessResponse(res);
       expect(res.body).toHaveProperty('data');
@@ -284,8 +274,7 @@ describe('Media Routes', () => {
       const searchTitle = 'Unique Search Title';
       await createTestMedia({ title: searchTitle });
 
-      const res = await request(app)
-        .get(`/api/media?search=${searchTitle}`);
+      const res = await request(app).get(`/api/media?search=${searchTitle}`);
 
       expectSuccessResponse(res);
       expect(res.body).toHaveProperty('data');
@@ -300,8 +289,7 @@ describe('Media Routes', () => {
       // Créer un média de test
       const testMedia = await createTestMedia();
 
-      const res = await request(app)
-        .get(`/api/media/${testMedia._id}`);
+      const res = await request(app).get(`/api/media/${testMedia._id}`);
 
       expectSuccessResponse(res);
       expect(res.body._id).toBe(testMedia._id.toString());
@@ -311,8 +299,7 @@ describe('Media Routes', () => {
     });
 
     test('Doit retourner 404 pour un média inexistant', async () => {
-      const res = await request(app)
-        .get('/api/media/507f1f77bcf86cd799439011');
+      const res = await request(app).get('/api/media/507f1f77bcf86cd799439011');
 
       expectErrorResponse(res, 404);
     });
@@ -322,12 +309,10 @@ describe('Media Routes', () => {
     test('Doit permettre à un admin de modifier un média', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un média de test
@@ -335,7 +320,7 @@ describe('Media Routes', () => {
 
       const updateData = {
         title: 'Updated Media Title',
-        description: 'Updated description'
+        description: 'Updated description',
       };
 
       const res = await request(app)
@@ -351,19 +336,17 @@ describe('Media Routes', () => {
     test('Doit refuser la modification par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un média de test
       const testMedia = await createTestMedia();
 
       const updateData = {
-        title: 'Updated Media Title'
+        title: 'Updated Media Title',
       };
 
       const res = await request(app)
@@ -379,7 +362,7 @@ describe('Media Routes', () => {
       const testMedia = await createTestMedia();
 
       const updateData = {
-        title: 'Updated Media Title'
+        title: 'Updated Media Title',
       };
 
       const res = await request(app)
@@ -392,16 +375,14 @@ describe('Media Routes', () => {
     test('Doit retourner 404 pour un média inexistant', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const updateData = {
-        title: 'Updated Media Title'
+        title: 'Updated Media Title',
       };
 
       const res = await request(app)
@@ -417,12 +398,10 @@ describe('Media Routes', () => {
     test('Doit permettre à un admin de supprimer un média', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un média de test
@@ -440,12 +419,10 @@ describe('Media Routes', () => {
     test('Doit refuser la suppression par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un média de test
@@ -462,8 +439,7 @@ describe('Media Routes', () => {
       // Créer un média de test
       const testMedia = await createTestMedia();
 
-      const res = await request(app)
-        .delete(`/api/media/${testMedia._id}`);
+      const res = await request(app).delete(`/api/media/${testMedia._id}`);
 
       expectErrorResponse(res, 401);
     });
@@ -471,12 +447,10 @@ describe('Media Routes', () => {
     test('Doit retourner 404 pour un média inexistant', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -488,15 +462,13 @@ describe('Media Routes', () => {
   });
 
   describe('POST /api/media/:id/reviews', () => {
-    test('Doit permettre d\'ajouter un avis', async () => {
+    test("Doit permettre d'ajouter un avis", async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un média de test
@@ -504,7 +476,7 @@ describe('Media Routes', () => {
 
       const reviewData = {
         rating: 5,
-        comment: 'Excellent média !'
+        comment: 'Excellent média !',
       };
 
       const res = await request(app)
@@ -518,13 +490,13 @@ describe('Media Routes', () => {
       expect(res.body.reviews.length).toBeGreaterThan(0);
     });
 
-    test('Doit refuser l\'ajout d\'avis sans authentification', async () => {
+    test("Doit refuser l'ajout d'avis sans authentification", async () => {
       // Créer un média de test
       const testMedia = await createTestMedia();
 
       const reviewData = {
         rating: 5,
-        comment: 'Excellent média !'
+        comment: 'Excellent média !',
       };
 
       const res = await request(app)
@@ -534,15 +506,13 @@ describe('Media Routes', () => {
       expectErrorResponse(res, 401);
     });
 
-    test('Doit refuser l\'ajout d\'un second avis par le même utilisateur', async () => {
+    test("Doit refuser l'ajout d'un second avis par le même utilisateur", async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un média de test
@@ -550,7 +520,7 @@ describe('Media Routes', () => {
 
       const reviewData = {
         rating: 5,
-        comment: 'Excellent média !'
+        comment: 'Excellent média !',
       };
 
       // Ajouter un premier avis
@@ -571,17 +541,15 @@ describe('Media Routes', () => {
     test('Doit retourner 404 pour un média inexistant', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const reviewData = {
         rating: 5,
-        comment: 'Excellent média !'
+        comment: 'Excellent média !',
       };
 
       const res = await request(app)
@@ -597,12 +565,10 @@ describe('Media Routes', () => {
     test('Doit permettre de modifier un avis existant', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un média de test
@@ -610,7 +576,7 @@ describe('Media Routes', () => {
 
       const reviewData = {
         rating: 5,
-        comment: 'Excellent média !'
+        comment: 'Excellent média !',
       };
 
       // Ajouter un avis d'abord
@@ -622,7 +588,7 @@ describe('Media Routes', () => {
       // Modifier l'avis
       const updateData = {
         rating: 4,
-        comment: 'Très bon média !'
+        comment: 'Très bon média !',
       };
 
       const res = await request(app)
@@ -641,7 +607,7 @@ describe('Media Routes', () => {
 
       const updateData = {
         rating: 4,
-        comment: 'Très bon média !'
+        comment: 'Très bon média !',
       };
 
       const res = await request(app)
@@ -654,17 +620,15 @@ describe('Media Routes', () => {
     test('Doit retourner 404 pour un média inexistant', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const updateData = {
         rating: 4,
-        comment: 'Très bon média !'
+        comment: 'Très bon média !',
       };
 
       const res = await request(app)
@@ -680,12 +644,10 @@ describe('Media Routes', () => {
     test('Doit gérer les erreurs de validation complexes', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Test avec des données très longues
@@ -694,7 +656,7 @@ describe('Media Routes', () => {
         type: 'book',
         author: 'Test Author',
         year: 2020,
-        description: 'Test description'
+        description: 'Test description',
       };
 
       const res = await request(app)
@@ -708,12 +670,10 @@ describe('Media Routes', () => {
     test('Doit gérer les erreurs de type de média invalide', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Test avec un type invalide
@@ -722,7 +682,7 @@ describe('Media Routes', () => {
         type: 'invalid-type',
         author: 'Test Author',
         year: 2020,
-        description: 'Test description'
+        description: 'Test description',
       };
 
       const res = await request(app)
@@ -733,15 +693,13 @@ describe('Media Routes', () => {
       expectErrorResponse(res, 400);
     });
 
-    test('Doit gérer les erreurs de validation d\'avis complexes', async () => {
+    test("Doit gérer les erreurs de validation d'avis complexes", async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un média de test
@@ -750,7 +708,7 @@ describe('Media Routes', () => {
       // Test avec un avis très long (qui devrait être accepté par MongoDB)
       const reviewData = {
         rating: 5,
-        comment: 'A'.repeat(1001)
+        comment: 'A'.repeat(1001),
       };
 
       const res = await request(app)
@@ -762,15 +720,13 @@ describe('Media Routes', () => {
       expectSuccessResponse(res, 201);
     });
 
-    test('Doit gérer les erreurs de validation de note d\'avis', async () => {
+    test("Doit gérer les erreurs de validation de note d'avis", async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un média de test
@@ -779,7 +735,7 @@ describe('Media Routes', () => {
       // Test avec une note invalide
       const reviewData = {
         rating: 15, // Note invalide (> 5)
-        comment: 'Test comment'
+        comment: 'Test comment',
       };
 
       const res = await request(app)

@@ -30,10 +30,8 @@ export const checkDueBorrows = async () => {
 
       if (returnDay.isSame(inTwoDays)) {
         await sendDueSoonReminder({ user, media, dueDate: formattedDate });
-
       } else if (returnDay.isBefore(yesterday)) {
         await sendLateReminder({ user, media, dueDate: formattedDate });
-
       }
     }
 

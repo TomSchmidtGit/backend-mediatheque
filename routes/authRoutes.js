@@ -1,25 +1,39 @@
 import express from 'express';
-import { registerUser, loginUser, refreshAccessToken, logoutUser, requestPasswordReset, resetPassword, changePassword } from '../controllers/authController.js';
+import {
+  registerUser,
+  loginUser,
+  refreshAccessToken,
+  logoutUser,
+  requestPasswordReset,
+  resetPassword,
+  changePassword,
+} from '../controllers/authController.js';
 import { protect, logout } from '../middlewares/authMiddleware.js';
 import { body, validationResult } from 'express-validator';
 import { loginRateLimiter } from '../middlewares/rateLimiters.js';
-import { registerValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, changePasswordValidator } from '../validators/authValidator.js';
+import {
+  registerValidator,
+  loginValidator,
+  forgotPasswordValidator,
+  resetPasswordValidator,
+  changePasswordValidator,
+} from '../validators/authValidator.js';
 import { validateRequest } from '../middlewares/validateRequest.js';
 
 // Middleware de validation
 const validateUser = [
-    body('name').trim().notEmpty().withMessage('Le nom est requis'),
-    body('email').isEmail().withMessage('Email invalide'),
-    body('password')
-        .isLength({ min: 6 })
-        .withMessage('Le mot de passe doit contenir au moins 6 caractères'),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        next();
-    },
+  body('name').trim().notEmpty().withMessage('Le nom est requis'),
+  body('email').isEmail().withMessage('Email invalide'),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Le mot de passe doit contenir au moins 6 caractères'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
 ];
 
 /**
@@ -93,8 +107,13 @@ router.post('/register', registerValidator, validateRequest, registerUser);
  *       401:
  *         description: Identifiants incorrects
  */
-router.post('/login', loginRateLimiter, loginValidator, validateRequest, loginUser);
-
+router.post(
+  '/login',
+  loginRateLimiter,
+  loginValidator,
+  validateRequest,
+  loginUser
+);
 
 /**
  * @swagger
@@ -191,7 +210,12 @@ router.post('/refresh', refreshAccessToken);
  *       403:
  *         description: Compte désactivé
  */
-router.post('/forgot-password', forgotPasswordValidator, validateRequest, requestPasswordReset);
+router.post(
+  '/forgot-password',
+  forgotPasswordValidator,
+  validateRequest,
+  requestPasswordReset
+);
 
 /**
  * @swagger
@@ -227,7 +251,12 @@ router.post('/forgot-password', forgotPasswordValidator, validateRequest, reques
  *       404:
  *         description: Utilisateur non trouvé
  */
-router.post('/reset-password', resetPasswordValidator, validateRequest, resetPassword);
+router.post(
+  '/reset-password',
+  resetPasswordValidator,
+  validateRequest,
+  resetPassword
+);
 
 /**
  * @swagger
@@ -261,6 +290,12 @@ router.post('/reset-password', resetPasswordValidator, validateRequest, resetPas
  *       401:
  *         description: Non autorisé
  */
-router.post('/change-password', protect, changePasswordValidator, validateRequest, changePassword);
+router.post(
+  '/change-password',
+  protect,
+  changePasswordValidator,
+  validateRequest,
+  changePassword
+);
 
 export default router;

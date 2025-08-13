@@ -6,10 +6,12 @@ import bcrypt from 'bcryptjs';
 export const createTestUser = async (userData = {}) => {
   const defaultData = {
     name: `Test User ${Date.now()}`,
-    email: `testuser_${Date.now()}_${Math.floor(Math.random() * 10000)}@example.com`,
+    email: `testuser_${Date.now()}_${Math.floor(
+      Math.random() * 10000
+    )}@example.com`,
     password: 'password123',
     role: 'user',
-    ...userData
+    ...userData,
   };
 
   const user = new User(defaultData);
@@ -21,7 +23,7 @@ export const createTestAdmin = async () => {
   return createTestUser({
     name: 'Test Admin',
     email: `admin_${Date.now()}@example.com`,
-    role: 'admin'
+    role: 'admin',
   });
 };
 
@@ -63,7 +65,7 @@ export const createTestMediaData = (overrides = {}) => {
     author: generateUniqueData('Test Author'),
     year: 2020,
     description: generateUniqueData('Test description'),
-    ...overrides
+    ...overrides,
   };
 };
 
@@ -71,7 +73,7 @@ export const createTestCategoryData = (overrides = {}) => {
   return {
     name: generateUniqueData('Test Category'),
     description: generateUniqueData('Test category description'),
-    ...overrides
+    ...overrides,
   };
 };
 
@@ -79,7 +81,7 @@ export const createTestTagData = (overrides = {}) => {
   return {
     name: generateUniqueData('Test Tag'),
     description: generateUniqueData('Test tag description'),
-    ...overrides
+    ...overrides,
   };
 };
 
@@ -87,8 +89,9 @@ export const createTestBorrowData = (overrides = {}) => {
   return {
     user: overrides.user || '507f1f77bcf86cd799439011',
     media: overrides.media || '507f1f77bcf86cd799439012',
-    dueDate: overrides.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-    ...overrides
+    dueDate:
+      overrides.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    ...overrides,
   };
 };
 
@@ -98,7 +101,7 @@ export const createTestContactData = (overrides = {}) => {
     email: `contact_${Date.now()}@example.com`,
     subject: generateUniqueData('Test Subject'),
     message: generateUniqueData('Test message content'),
-    ...overrides
+    ...overrides,
   };
 };
 
@@ -129,17 +132,17 @@ export const createTestTag = async (overrides = {}) => {
 export const createTestBorrow = async (overrides = {}) => {
   const user = await createTestUser();
   const media = await createTestMedia();
-  
+
   const borrowData = createTestBorrowData({
     user: user._id,
     media: media._id,
-    ...overrides
+    ...overrides,
   });
-  
+
   const Borrow = (await import('../../models/Borrow.js')).default;
   const borrow = new Borrow(borrowData);
   await borrow.save();
-  
+
   return { borrow, user, media };
 };
 
@@ -148,16 +151,24 @@ export const expectSuccessResponse = (response, expectedStatus = 200) => {
   expect(response.body).toBeDefined();
 };
 
-export const expectErrorResponse = (response, expectedStatus, expectedMessage) => {
+export const expectErrorResponse = (
+  response,
+  expectedStatus,
+  expectedMessage
+) => {
   expect(response.status).toBe(expectedStatus);
-  
+
   if (response.body.errors && Array.isArray(response.body.errors)) {
     expect(response.body.errors).toBeDefined();
     if (expectedMessage) {
       if (typeof expectedMessage === 'string') {
-        expect(response.body.errors.some(err => err.includes(expectedMessage))).toBe(true);
+        expect(
+          response.body.errors.some(err => err.includes(expectedMessage))
+        ).toBe(true);
       } else if (expectedMessage instanceof RegExp) {
-        expect(response.body.errors.some(err => expectedMessage.test(err))).toBe(true);
+        expect(
+          response.body.errors.some(err => expectedMessage.test(err))
+        ).toBe(true);
       }
     }
   } else if (response.body.message) {

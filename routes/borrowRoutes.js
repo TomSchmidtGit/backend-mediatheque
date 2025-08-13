@@ -1,10 +1,10 @@
 import express from 'express';
 import {
-    borrowMedia,
-    returnMedia,
-    getUserBorrows,
-    getAllBorrows,
-    getMyBorrows
+  borrowMedia,
+  returnMedia,
+  getUserBorrows,
+  getAllBorrows,
+  getMyBorrows,
 } from '../controllers/borrowController.js';
 import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
 

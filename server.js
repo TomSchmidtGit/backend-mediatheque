@@ -25,7 +25,7 @@ dotenv.config();
 
 // Connexion à la base de données (uniquement en production/dev)
 if (process.env.NODE_ENV !== 'test') {
-    connectDB();
+  connectDB();
 }
 
 // Initialisation de l'application Express
@@ -41,14 +41,14 @@ app.use(morgan('dev'));
 
 // Protection contre le brute force
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limite chaque IP à 100 requêtes
-    message: { error: "Trop de requêtes, veuillez réessayer plus tard." },
-    standardHeaders: true,
-    legacyHeaders: false,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limite chaque IP à 100 requêtes
+  message: { error: 'Trop de requêtes, veuillez réessayer plus tard.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 if (process.env.NODE_ENV !== 'test') {
-    app.use(limiter);
+  app.use(limiter);
 }
 
 // Ajouter les routes
@@ -66,23 +66,25 @@ swaggerDocs(app);
 
 // Planification des rappels d'emprunts (uniquement en production/dev)
 if (process.env.NODE_ENV !== 'test') {
-    scheduleBorrowReminders();
+  scheduleBorrowReminders();
 }
 
 // Route de test pour vérifier que l'API tourne
 app.get('/api/health', (req, res) => {
-    res.status(200).json({ message: 'API is running' });
+  res.status(200).json({ message: 'API is running' });
 });
 
 // Gestion des erreurs 404
 app.use((req, res, next) => {
-    res.status(404).json({ message: 'Route non trouvée' });
+  res.status(404).json({ message: 'Route non trouvée' });
 });
 
 // Démarrage du serveur uniquement si ce n'est pas un test Jest
 let server;
 if (process.env.NODE_ENV !== 'test') {
-    server = app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  server = app.listen(PORT, () =>
+    console.log(`🚀 Server running on port ${PORT}`)
+  );
 }
 
 export { app, server }; // Exportation pour les tests

@@ -1,11 +1,11 @@
 import request from 'supertest';
 import { app } from '../server.js';
-import { 
-  createTestUser, 
+import {
+  createTestUser,
   createTestAdmin,
   createTestCategory,
   expectErrorResponse,
-  expectSuccessResponse
+  expectSuccessResponse,
 } from './utils/testHelpers.js';
 
 describe('Category Routes', () => {
@@ -13,16 +13,14 @@ describe('Category Routes', () => {
     test('Doit créer une nouvelle catégorie avec des données valides', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const categoryData = {
-        name: 'Test Category'
+        name: 'Test Category',
       };
 
       const res = await request(app)
@@ -41,16 +39,14 @@ describe('Category Routes', () => {
     test('Doit refuser la création par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const categoryData = {
-        name: 'Test Category'
+        name: 'Test Category',
       };
 
       const res = await request(app)
@@ -63,12 +59,10 @@ describe('Category Routes', () => {
 
     test('Doit refuser la création sans authentification', async () => {
       const categoryData = {
-        name: 'Test Category'
+        name: 'Test Category',
       };
 
-      const res = await request(app)
-        .post('/api/categories')
-        .send(categoryData);
+      const res = await request(app).post('/api/categories').send(categoryData);
 
       expectErrorResponse(res, 401);
     });
@@ -76,12 +70,10 @@ describe('Category Routes', () => {
     test('Doit valider les données obligatoires', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Test sans nom
@@ -101,20 +93,18 @@ describe('Category Routes', () => {
       expectErrorResponse(res2, 400);
     });
 
-    test('Doit refuser la création d\'une catégorie avec un nom déjà existant', async () => {
+    test("Doit refuser la création d'une catégorie avec un nom déjà existant", async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer une première catégorie
       const categoryData = {
-        name: 'Duplicate Category'
+        name: 'Duplicate Category',
       };
 
       await request(app)
@@ -150,8 +140,7 @@ describe('Category Routes', () => {
       await createTestCategory();
       await createTestCategory();
 
-      const res = await request(app)
-        .get('/api/categories?page=1&limit=2');
+      const res = await request(app).get('/api/categories?page=1&limit=2');
 
       expectSuccessResponse(res);
       expect(Array.isArray(res.body)).toBe(true);
@@ -163,8 +152,9 @@ describe('Category Routes', () => {
       const searchName = 'Unique Search Category';
       await createTestCategory({ name: searchName });
 
-      const res = await request(app)
-        .get(`/api/categories?search=${searchName}`);
+      const res = await request(app).get(
+        `/api/categories?search=${searchName}`
+      );
 
       expectSuccessResponse(res);
       expect(Array.isArray(res.body)).toBe(true);
@@ -177,19 +167,17 @@ describe('Category Routes', () => {
     test('Doit permettre à un admin de modifier une catégorie', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer une catégorie de test
       const testCategory = await createTestCategory();
 
       const updateData = {
-        name: 'Updated Category Name'
+        name: 'Updated Category Name',
       };
 
       const res = await request(app)
@@ -206,19 +194,17 @@ describe('Category Routes', () => {
     test('Doit refuser la modification par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer une catégorie de test
       const testCategory = await createTestCategory();
 
       const updateData = {
-        name: 'Updated Category Name'
+        name: 'Updated Category Name',
       };
 
       const res = await request(app)
@@ -234,7 +220,7 @@ describe('Category Routes', () => {
       const testCategory = await createTestCategory();
 
       const updateData = {
-        name: 'Updated Category Name'
+        name: 'Updated Category Name',
       };
 
       const res = await request(app)
@@ -247,16 +233,14 @@ describe('Category Routes', () => {
     test('Doit retourner 404 pour une catégorie inexistante', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const updateData = {
-        name: 'Updated Category Name'
+        name: 'Updated Category Name',
       };
 
       const res = await request(app)
@@ -270,12 +254,10 @@ describe('Category Routes', () => {
     test('Doit valider les données de mise à jour', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer une catégorie de test
@@ -283,7 +265,7 @@ describe('Category Routes', () => {
 
       // Test avec nom vide - l'API peut accepter cela, donc on vérifie juste que ça fonctionne
       const invalidData = {
-        name: ''
+        name: '',
       };
 
       const res = await request(app)
@@ -305,12 +287,10 @@ describe('Category Routes', () => {
     test('Doit permettre à un admin de supprimer une catégorie', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer une catégorie de test
@@ -328,12 +308,10 @@ describe('Category Routes', () => {
     test('Doit refuser la suppression par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer une catégorie de test
@@ -350,8 +328,9 @@ describe('Category Routes', () => {
       // Créer une catégorie de test
       const testCategory = await createTestCategory();
 
-      const res = await request(app)
-        .delete(`/api/categories/${testCategory._id}`);
+      const res = await request(app).delete(
+        `/api/categories/${testCategory._id}`
+      );
 
       expectErrorResponse(res, 401);
     });
@@ -359,12 +338,10 @@ describe('Category Routes', () => {
     test('Doit retourner 404 pour une catégorie inexistante', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const res = await request(app)

@@ -1,8 +1,8 @@
 import express from 'express';
-import { 
-    getDashboardStats, 
-    getBorrowStatsByPeriod,
-    getMediaStatsByCategory 
+import {
+  getDashboardStats,
+  getBorrowStatsByPeriod,
+  getMediaStatsByCategory,
 } from '../controllers/dashboardController.js';
 import { protect, adminOnly } from '../middlewares/authMiddleware.js';
 

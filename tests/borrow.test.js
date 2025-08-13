@@ -1,12 +1,12 @@
 import request from 'supertest';
 import { app } from '../server.js';
-import { 
-  createTestUser, 
+import {
+  createTestUser,
   createTestAdmin,
   createTestBorrow,
   createTestMedia,
   expectErrorResponse,
-  expectSuccessResponse
+  expectSuccessResponse,
 } from './utils/testHelpers.js';
 
 describe('Borrow Routes', () => {
@@ -14,12 +14,10 @@ describe('Borrow Routes', () => {
     test('Doit créer un nouvel emprunt avec des données valides', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur et un média pour l'emprunt
@@ -28,7 +26,7 @@ describe('Borrow Routes', () => {
 
       const borrowData = {
         userId: user._id.toString(),
-        mediaId: media._id.toString()
+        mediaId: media._id.toString(),
       };
 
       const res = await request(app)
@@ -45,20 +43,18 @@ describe('Borrow Routes', () => {
       expect(res.body).toHaveProperty('status');
     });
 
-    test('Doit refuser la création d\'emprunt par un utilisateur non-admin', async () => {
+    test("Doit refuser la création d'emprunt par un utilisateur non-admin", async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const borrowData = {
         userId: user._id.toString(),
-        mediaId: '507f1f77bcf86cd799439011'
+        mediaId: '507f1f77bcf86cd799439011',
       };
 
       const res = await request(app)
@@ -72,7 +68,7 @@ describe('Borrow Routes', () => {
     test('Doit refuser la création sans authentification', async () => {
       const borrowData = {
         userId: '507f1f77bcf86cd799439011',
-        mediaId: '507f1f77bcf86cd799439012'
+        mediaId: '507f1f77bcf86cd799439012',
       };
 
       const res = await request(app).post('/api/borrow').send(borrowData);
@@ -82,12 +78,10 @@ describe('Borrow Routes', () => {
     test('Doit valider les données obligatoires', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Test sans utilisateur
@@ -110,19 +104,17 @@ describe('Borrow Routes', () => {
     test('Doit refuser la création pour un utilisateur inexistant', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const media = await createTestMedia();
 
       const borrowData = {
         userId: '507f1f77bcf86cd799439011', // ID inexistant
-        mediaId: media._id.toString()
+        mediaId: media._id.toString(),
       };
 
       const res = await request(app)
@@ -136,19 +128,17 @@ describe('Borrow Routes', () => {
     test('Doit refuser la création pour un média inexistant', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const user = await createTestUser();
 
       const borrowData = {
         userId: user._id.toString(),
-        mediaId: '507f1f77bcf86cd799439011' // ID inexistant
+        mediaId: '507f1f77bcf86cd799439011', // ID inexistant
       };
 
       const res = await request(app)
@@ -164,12 +154,10 @@ describe('Borrow Routes', () => {
     test('Doit permettre de retourner un média emprunté', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un emprunt
@@ -187,8 +175,7 @@ describe('Borrow Routes', () => {
     test('Doit refuser le retour sans authentification', async () => {
       const { borrow } = await createTestBorrow();
 
-      const res = await request(app)
-        .put(`/api/borrow/${borrow._id}/return`);
+      const res = await request(app).put(`/api/borrow/${borrow._id}/return`);
 
       expectErrorResponse(res, 401);
     });
@@ -198,12 +185,10 @@ describe('Borrow Routes', () => {
     test('Doit permettre à un utilisateur de voir ses propres emprunts', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer quelques emprunts pour cet utilisateur
@@ -219,7 +204,7 @@ describe('Borrow Routes', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
     });
 
-    test('Doit refuser l\'accès sans authentification', async () => {
+    test("Doit refuser l'accès sans authentification", async () => {
       const res = await request(app).get('/api/borrow/mine');
       expectErrorResponse(res, 401);
     });
@@ -227,12 +212,10 @@ describe('Borrow Routes', () => {
     test('Doit supporter la pagination', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer quelques emprunts
@@ -255,12 +238,10 @@ describe('Borrow Routes', () => {
     test('Doit permettre à un admin de récupérer tous les emprunts', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer quelques emprunts
@@ -276,15 +257,13 @@ describe('Borrow Routes', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
     });
 
-    test('Doit refuser l\'accès pour un utilisateur non-admin', async () => {
+    test("Doit refuser l'accès pour un utilisateur non-admin", async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -294,7 +273,7 @@ describe('Borrow Routes', () => {
       expectErrorResponse(res, 403);
     });
 
-    test('Doit refuser l\'accès sans authentification', async () => {
+    test("Doit refuser l'accès sans authentification", async () => {
       const res = await request(app).get('/api/borrow');
       expectErrorResponse(res, 401);
     });
@@ -302,12 +281,10 @@ describe('Borrow Routes', () => {
     test('Doit supporter la pagination', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer quelques emprunts
@@ -327,15 +304,13 @@ describe('Borrow Routes', () => {
   });
 
   describe('GET /api/borrow/user/:userId', () => {
-    test('Doit permettre à un admin de voir les emprunts d\'un utilisateur', async () => {
+    test("Doit permettre à un admin de voir les emprunts d'un utilisateur", async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur et quelques emprunts
@@ -352,15 +327,13 @@ describe('Borrow Routes', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
     });
 
-    test('Doit refuser l\'accès pour un utilisateur non-admin', async () => {
+    test("Doit refuser l'accès pour un utilisateur non-admin", async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -373,12 +346,10 @@ describe('Borrow Routes', () => {
     test('Doit supporter la pagination', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur et quelques emprunts
@@ -402,12 +373,10 @@ describe('Borrow Routes', () => {
     test('Doit gérer les erreurs de validation de dates complexes', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur et un média de test
@@ -419,7 +388,7 @@ describe('Borrow Routes', () => {
       const borrowData = {
         user: user._id,
         media: media._id,
-        dueDate: pastDate
+        dueDate: pastDate,
       };
 
       const res = await request(app)
@@ -433,19 +402,17 @@ describe('Borrow Routes', () => {
     test('Doit gérer les erreurs de validation de données complexes', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Test avec des données invalides
       const borrowData = {
         user: 'invalid-user-id',
         media: 'invalid-media-id',
-        dueDate: 'invalid-date'
+        dueDate: 'invalid-date',
       };
 
       const res = await request(app)
@@ -459,12 +426,10 @@ describe('Borrow Routes', () => {
     test('Doit gérer les erreurs de retour de média non emprunté', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un média de test (non emprunté)
@@ -482,12 +447,10 @@ describe('Borrow Routes', () => {
     test('Doit gérer les erreurs de pagination invalide', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Test avec des paramètres de pagination invalides

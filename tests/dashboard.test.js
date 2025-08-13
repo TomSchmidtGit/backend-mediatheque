@@ -1,12 +1,12 @@
 import request from 'supertest';
 import { app } from '../server.js';
-import { 
-  createTestUser, 
+import {
+  createTestUser,
   createTestAdmin,
   createTestBorrow,
   createTestMedia,
   expectErrorResponse,
-  expectSuccessResponse
+  expectSuccessResponse,
 } from './utils/testHelpers.js';
 
 describe('Dashboard Routes', () => {
@@ -14,12 +14,10 @@ describe('Dashboard Routes', () => {
     test('Doit permettre à un admin de récupérer les statistiques globales', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer quelques données de test pour avoir des statistiques
@@ -37,15 +35,13 @@ describe('Dashboard Routes', () => {
       expect(res.body).toHaveProperty('borrows');
     });
 
-    test('Doit refuser l\'accès aux statistiques pour un utilisateur non-admin', async () => {
+    test("Doit refuser l'accès aux statistiques pour un utilisateur non-admin", async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -55,22 +51,20 @@ describe('Dashboard Routes', () => {
       expectErrorResponse(res, 403);
     });
 
-    test('Doit refuser l\'accès sans authentification', async () => {
+    test("Doit refuser l'accès sans authentification", async () => {
       const res = await request(app).get('/api/dashboard/stats');
       expectErrorResponse(res, 401);
     });
   });
 
   describe('GET /api/dashboard/borrows/stats', () => {
-    test('Doit permettre à un admin de récupérer les statistiques d\'emprunts par période', async () => {
+    test("Doit permettre à un admin de récupérer les statistiques d'emprunts par période", async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer quelques emprunts
@@ -87,15 +81,13 @@ describe('Dashboard Routes', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
     });
 
-    test('Doit refuser l\'accès pour un utilisateur non-admin', async () => {
+    test("Doit refuser l'accès pour un utilisateur non-admin", async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -110,12 +102,10 @@ describe('Dashboard Routes', () => {
     test('Doit permettre à un admin de récupérer les statistiques des médias par catégorie', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer quelques médias avec catégories
@@ -130,15 +120,13 @@ describe('Dashboard Routes', () => {
       expect(Array.isArray(res.body)).toBe(true);
     });
 
-    test('Doit refuser l\'accès pour un utilisateur non-admin', async () => {
+    test("Doit refuser l'accès pour un utilisateur non-admin", async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)

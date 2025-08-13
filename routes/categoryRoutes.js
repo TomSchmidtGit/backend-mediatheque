@@ -1,9 +1,9 @@
 import express from 'express';
 import {
-    createCategory,
-    getAllCategories,
-    updateCategory,
-    deleteCategory
+  createCategory,
+  getAllCategories,
+  updateCategory,
+  deleteCategory,
 } from '../controllers/categoryController.js';
 import { protect, adminOnly } from '../middlewares/authMiddleware.js';
 
