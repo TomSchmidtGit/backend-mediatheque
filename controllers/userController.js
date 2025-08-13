@@ -82,6 +82,21 @@ export const updateUser = async (req, res) => {
             role: updatedUser.role,
         });
     } catch (error) {
+        // Gérer les erreurs de validation MongoDB
+        if (error.code === 11000) {
+            return res.status(400).json({ 
+                message: 'Cet email est déjà utilisé par un autre utilisateur' 
+            });
+        }
+        
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({ 
+                message: 'Données invalides', 
+                errors: messages 
+            });
+        }
+        
         res.status(500).json({ error: error.message });
     }
 };

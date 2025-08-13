@@ -13,6 +13,25 @@ export const sendContactMessage = async (req, res) => {
             });
         }
 
+        // Validation de la longueur des champs
+        if (name.trim().length < 2 || name.trim().length > 100) {
+            return res.status(400).json({ 
+                message: 'Le nom doit contenir entre 2 et 100 caractères' 
+            });
+        }
+
+        if (subject.trim().length < 5 || subject.trim().length > 200) {
+            return res.status(400).json({ 
+                message: 'Le sujet doit contenir entre 5 et 200 caractères' 
+            });
+        }
+
+        if (message.trim().length < 10 || message.trim().length > 2000) {
+            return res.status(400).json({ 
+                message: 'Le message doit contenir entre 10 et 2000 caractères' 
+            });
+        }
+
         // Validation email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {

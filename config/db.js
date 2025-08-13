@@ -2,7 +2,18 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI, {
+        let mongoURI;
+        if (process.env.NODE_ENV === 'production') {
+            mongoURI = process.env.MONGO_URI_PROD || process.env.MONGO_URI;
+        } else {
+            mongoURI = process.env.MONGO_URI;
+        }
+        
+        const dbName = mongoURI.split('/').pop().split('?')[0];
+        console.log(`🗄️ Base de données: ${dbName}`);
+        console.log(`🔗 Environnement: ${process.env.NODE_ENV || 'development'}`);
+        
+        await mongoose.connect(mongoURI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
