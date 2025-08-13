@@ -9,38 +9,39 @@ const router = express.Router();
 
 // Rate limiter spécifique pour le contact (éviter le spam)
 const contactRateLimiter = rateLimit({
-    windowMs: process.env.NODE_ENV === 'test' ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1 minute en test, 15 en prod
-    max: process.env.NODE_ENV === 'test' ? 100 : 3, // 100 messages max en test, 3 en prod
-    message: {
-        message: "Trop de messages envoyés. Veuillez attendre 15 minutes avant de renvoyer un message."
-    },
-    standardHeaders: true,
-    legacyHeaders: false
+  windowMs: process.env.NODE_ENV === 'test' ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1 minute en test, 15 en prod
+  max: process.env.NODE_ENV === 'test' ? 100 : 3, // 100 messages max en test, 3 en prod
+  message: {
+    message:
+      'Trop de messages envoyés. Veuillez attendre 15 minutes avant de renvoyer un message.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // Validation des données du formulaire de contact
 const contactValidator = [
-    body('name')
-        .trim()
-        .isLength({ min: 2, max: 100 })
-        .withMessage('Le nom doit contenir entre 2 et 100 caractères'),
-    body('email')
-        .isEmail()
-        .normalizeEmail()
-        .withMessage('Veuillez fournir une adresse email valide'),
-    body('subject')
-        .trim()
-        .isLength({ min: 5, max: 200 })
-        .withMessage('Le sujet doit contenir entre 5 et 200 caractères'),
-    body('message')
-        .trim()
-        .isLength({ min: 10, max: 2000 })
-        .withMessage('Le message doit contenir entre 10 et 2000 caractères'),
-    body('phone')
-        .optional()
-        .trim()
-        .isMobilePhone('fr-FR')
-        .withMessage('Numéro de téléphone invalide (format français attendu)')
+  body('name')
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Le nom doit contenir entre 2 et 100 caractères'),
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Veuillez fournir une adresse email valide'),
+  body('subject')
+    .trim()
+    .isLength({ min: 5, max: 200 })
+    .withMessage('Le sujet doit contenir entre 5 et 200 caractères'),
+  body('message')
+    .trim()
+    .isLength({ min: 10, max: 2000 })
+    .withMessage('Le message doit contenir entre 10 et 2000 caractères'),
+  body('phone')
+    .optional()
+    .trim()
+    .isMobilePhone('fr-FR')
+    .withMessage('Numéro de téléphone invalide (format français attendu)'),
 ];
 
 /**
@@ -147,6 +148,12 @@ const contactValidator = [
  *                   type: string
  *                   example: "Une erreur interne s'est produite."
  */
-router.post('/', contactRateLimiter, contactValidator, validateRequest, sendContactMessage);
+router.post(
+  '/',
+  contactRateLimiter,
+  contactValidator,
+  validateRequest,
+  sendContactMessage
+);
 
 export default router;

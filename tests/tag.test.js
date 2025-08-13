@@ -1,11 +1,11 @@
 import request from 'supertest';
 import { app } from '../server.js';
-import { 
-  createTestUser, 
+import {
+  createTestUser,
   createTestAdmin,
   createTestTag,
   expectErrorResponse,
-  expectSuccessResponse
+  expectSuccessResponse,
 } from './utils/testHelpers.js';
 
 describe('Tag Routes', () => {
@@ -13,16 +13,14 @@ describe('Tag Routes', () => {
     test('Doit créer un nouveau tag avec des données valides', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const tagData = {
-        name: 'Test Tag'
+        name: 'Test Tag',
       };
 
       const res = await request(app)
@@ -39,16 +37,14 @@ describe('Tag Routes', () => {
     test('Doit refuser la création par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const tagData = {
-        name: 'Test Tag'
+        name: 'Test Tag',
       };
 
       const res = await request(app)
@@ -61,12 +57,10 @@ describe('Tag Routes', () => {
 
     test('Doit refuser la création sans authentification', async () => {
       const tagData = {
-        name: 'Test Tag'
+        name: 'Test Tag',
       };
 
-      const res = await request(app)
-        .post('/api/tags')
-        .send(tagData);
+      const res = await request(app).post('/api/tags').send(tagData);
 
       expectErrorResponse(res, 401);
     });
@@ -74,12 +68,10 @@ describe('Tag Routes', () => {
     test('Doit valider les données obligatoires', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Test sans nom
@@ -99,20 +91,18 @@ describe('Tag Routes', () => {
       expectErrorResponse(res2, 400);
     });
 
-    test('Doit refuser la création d\'un tag avec un nom déjà existant', async () => {
+    test("Doit refuser la création d'un tag avec un nom déjà existant", async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un premier tag
       const tagData = {
-        name: 'Duplicate Tag'
+        name: 'Duplicate Tag',
       };
 
       await request(app)
@@ -148,8 +138,7 @@ describe('Tag Routes', () => {
       await createTestTag();
       await createTestTag();
 
-      const res = await request(app)
-        .get('/api/tags?page=1&limit=2');
+      const res = await request(app).get('/api/tags?page=1&limit=2');
 
       expectSuccessResponse(res);
       expect(Array.isArray(res.body)).toBe(true);
@@ -161,8 +150,7 @@ describe('Tag Routes', () => {
       const searchName = 'Unique Search Tag';
       await createTestTag({ name: searchName });
 
-      const res = await request(app)
-        .get(`/api/tags?search=${searchName}`);
+      const res = await request(app).get(`/api/tags?search=${searchName}`);
 
       expectSuccessResponse(res);
       expect(Array.isArray(res.body)).toBe(true);
@@ -175,19 +163,17 @@ describe('Tag Routes', () => {
     test('Doit permettre à un admin de modifier un tag', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un tag de test
       const testTag = await createTestTag();
 
       const updateData = {
-        name: 'Updated Tag Name'
+        name: 'Updated Tag Name',
       };
 
       const res = await request(app)
@@ -202,19 +188,17 @@ describe('Tag Routes', () => {
     test('Doit refuser la modification par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un tag de test
       const testTag = await createTestTag();
 
       const updateData = {
-        name: 'Updated Tag Name'
+        name: 'Updated Tag Name',
       };
 
       const res = await request(app)
@@ -230,7 +214,7 @@ describe('Tag Routes', () => {
       const testTag = await createTestTag();
 
       const updateData = {
-        name: 'Updated Tag Name'
+        name: 'Updated Tag Name',
       };
 
       const res = await request(app)
@@ -243,16 +227,14 @@ describe('Tag Routes', () => {
     test('Doit retourner 404 pour un tag inexistant', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const updateData = {
-        name: 'Updated Tag Name'
+        name: 'Updated Tag Name',
       };
 
       const res = await request(app)
@@ -266,12 +248,10 @@ describe('Tag Routes', () => {
     test('Doit valider les données de mise à jour', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un tag de test
@@ -279,7 +259,7 @@ describe('Tag Routes', () => {
 
       // Test avec nom vide - l'API peut accepter cela, donc on vérifie juste que ça fonctionne
       const invalidData = {
-        name: ''
+        name: '',
       };
 
       const res = await request(app)
@@ -301,12 +281,10 @@ describe('Tag Routes', () => {
     test('Doit permettre à un admin de supprimer un tag', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un tag de test
@@ -324,12 +302,10 @@ describe('Tag Routes', () => {
     test('Doit refuser la suppression par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un tag de test
@@ -346,8 +322,7 @@ describe('Tag Routes', () => {
       // Créer un tag de test
       const testTag = await createTestTag();
 
-      const res = await request(app)
-        .delete(`/api/tags/${testTag._id}`);
+      const res = await request(app).delete(`/api/tags/${testTag._id}`);
 
       expectErrorResponse(res, 401);
     });
@@ -355,12 +330,10 @@ describe('Tag Routes', () => {
     test('Doit retourner 404 pour un tag inexistant', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const res = await request(app)

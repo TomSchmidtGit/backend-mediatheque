@@ -1,6 +1,6 @@
 export const accountDeactivationTemplate = ({ name }) => ({
-    subject: '🚫 Compte utilisateur désactivé',
-    text: `Bonjour ${name},
+  subject: '🚫 Compte utilisateur désactivé',
+  text: `Bonjour ${name},
 
 Votre compte a été désactivé par un administrateur.
 
@@ -8,5 +8,5 @@ Vous ne pouvez plus accéder à votre espace utilisateur tant que le compte n'es
 
 Pour plus d’informations, veuillez contacter l’équipe de la médiathèque.
 
-L’équipe Médiathèque`
+L’équipe Médiathèque`,
 });

@@ -1,11 +1,23 @@
 import express from 'express';
-import { getUsers, updateUser, getUserById, getMyProfile, updateMyProfile } from '../controllers/userController.js';
+import {
+  getUsers,
+  updateUser,
+  getUserById,
+  getMyProfile,
+  updateMyProfile,
+} from '../controllers/userController.js';
 import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
-import { toggleFavorite, getMyFavorites } from '../controllers/userController.js';
-import { deactivateUser, reactivateUser, deactivateMyAccount } from '../controllers/userController.js';
+import {
+  toggleFavorite,
+  getMyFavorites,
+} from '../controllers/userController.js';
+import {
+  deactivateUser,
+  reactivateUser,
+  deactivateMyAccount,
+} from '../controllers/userController.js';
 
 const router = express.Router();
-
 
 /**
  * @swagger
@@ -249,7 +261,12 @@ router.get('/', protect, authorizeRoles('admin'), getUsers);
  *       404:
  *         description: Utilisateur non trouvé.
  */
-router.patch('/:id/deactivate', protect, authorizeRoles('admin'), deactivateUser);
+router.patch(
+  '/:id/deactivate',
+  protect,
+  authorizeRoles('admin'),
+  deactivateUser
+);
 
 /**
  * @swagger
@@ -275,7 +292,12 @@ router.patch('/:id/deactivate', protect, authorizeRoles('admin'), deactivateUser
  *       404:
  *         description: Utilisateur non trouvé.
  */
-router.patch('/:id/reactivate', protect, authorizeRoles('admin'), reactivateUser);
+router.patch(
+  '/:id/reactivate',
+  protect,
+  authorizeRoles('admin'),
+  reactivateUser
+);
 
 /**
  * @swagger
@@ -367,7 +389,5 @@ router.get('/:id', protect, authorizeRoles('admin'), getUserById);
  *         description: Utilisateur non trouvé.
  */
 router.put('/:id', protect, authorizeRoles('admin'), updateUser);
-
-
 
 export default router;

@@ -1,10 +1,10 @@
 import request from 'supertest';
 import { app } from '../server.js';
-import { 
-  createTestUser, 
+import {
+  createTestUser,
   createTestAdmin,
   expectErrorResponse,
-  expectSuccessResponse
+  expectSuccessResponse,
 } from './utils/testHelpers.js';
 
 describe('User Routes', () => {
@@ -12,12 +12,10 @@ describe('User Routes', () => {
     test('Doit permettre à un admin de récupérer tous les utilisateurs', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer quelques utilisateurs de test
@@ -34,15 +32,13 @@ describe('User Routes', () => {
       expect(res.body.data.length).toBeGreaterThanOrEqual(3); // admin + 2 utilisateurs
     });
 
-    test('Doit refuser l\'accès pour un utilisateur non-admin', async () => {
+    test("Doit refuser l'accès pour un utilisateur non-admin", async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -52,7 +48,7 @@ describe('User Routes', () => {
       expectErrorResponse(res, 403);
     });
 
-    test('Doit refuser l\'accès sans authentification', async () => {
+    test("Doit refuser l'accès sans authentification", async () => {
       const res = await request(app).get('/api/users');
       expectErrorResponse(res, 401);
     });
@@ -62,12 +58,10 @@ describe('User Routes', () => {
     test('Doit permettre à un admin de récupérer un utilisateur spécifique', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur de test
@@ -84,15 +78,13 @@ describe('User Routes', () => {
       expect(res.body).toHaveProperty('role');
     });
 
-    test('Doit refuser l\'accès pour un utilisateur non-admin', async () => {
+    test("Doit refuser l'accès pour un utilisateur non-admin", async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -105,12 +97,10 @@ describe('User Routes', () => {
     test('Doit retourner 404 pour un utilisateur inexistant', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -125,12 +115,10 @@ describe('User Routes', () => {
     test('Doit permettre à un admin de modifier un utilisateur', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur de test
@@ -138,7 +126,7 @@ describe('User Routes', () => {
 
       const updateData = {
         name: 'Updated User Name',
-        email: 'updated@example.com'
+        email: 'updated@example.com',
       };
 
       const res = await request(app)
@@ -154,16 +142,14 @@ describe('User Routes', () => {
     test('Doit refuser la modification par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const updateData = {
-        name: 'Updated User Name'
+        name: 'Updated User Name',
       };
 
       const res = await request(app)
@@ -176,7 +162,7 @@ describe('User Routes', () => {
 
     test('Doit refuser la modification sans authentification', async () => {
       const updateData = {
-        name: 'Updated User Name'
+        name: 'Updated User Name',
       };
 
       const res = await request(app)
@@ -189,12 +175,10 @@ describe('User Routes', () => {
     test('Doit valider les données de mise à jour', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur de test
@@ -203,7 +187,7 @@ describe('User Routes', () => {
       // Test avec un email déjà utilisé par un autre utilisateur
       const otherUser = await createTestUser();
       const invalidData = {
-        email: otherUser.email
+        email: otherUser.email,
       };
 
       const res = await request(app)
@@ -219,12 +203,10 @@ describe('User Routes', () => {
     test('Doit permettre à un admin de désactiver un utilisateur', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur de test
@@ -242,12 +224,10 @@ describe('User Routes', () => {
     test('Doit refuser la désactivation par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -262,12 +242,10 @@ describe('User Routes', () => {
     test('Doit permettre à un admin de réactiver un utilisateur', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur de test et le désactiver d'abord
@@ -287,12 +265,10 @@ describe('User Routes', () => {
     test('Doit refuser la réactivation par un utilisateur non-admin', async () => {
       // Créer un utilisateur normal et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -307,12 +283,10 @@ describe('User Routes', () => {
     test('Doit permettre à un utilisateur de récupérer son profil', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -326,7 +300,7 @@ describe('User Routes', () => {
       expect(res.body).toHaveProperty('role');
     });
 
-    test('Doit refuser l\'accès sans authentification', async () => {
+    test("Doit refuser l'accès sans authentification", async () => {
       const res = await request(app).get('/api/users/me');
       expectErrorResponse(res, 401);
     });
@@ -336,16 +310,14 @@ describe('User Routes', () => {
     test('Doit permettre à un utilisateur de mettre à jour son profil', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const updateData = {
-        name: 'Updated My Name'
+        name: 'Updated My Name',
       };
 
       const res = await request(app)
@@ -359,12 +331,10 @@ describe('User Routes', () => {
 
     test('Doit refuser la mise à jour sans authentification', async () => {
       const updateData = {
-        name: 'Updated Name'
+        name: 'Updated Name',
       };
 
-      const res = await request(app)
-        .put('/api/users/me')
-        .send(updateData);
+      const res = await request(app).put('/api/users/me').send(updateData);
 
       expectErrorResponse(res, 401);
     });
@@ -372,20 +342,18 @@ describe('User Routes', () => {
     test('Doit valider les données de mise à jour', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       // Créer un autre utilisateur avec un email différent
       const otherUser = await createTestUser();
-      
+
       // Essayer d'utiliser l'email de l'autre utilisateur
       const invalidData = {
-        email: otherUser.email
+        email: otherUser.email,
       };
 
       const res = await request(app)
@@ -401,16 +369,14 @@ describe('User Routes', () => {
     test('Doit permettre à un utilisateur de désactiver son propre compte', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const deactivateData = {
-        password: 'password123'
+        password: 'password123',
       };
 
       const res = await request(app)
@@ -426,12 +392,10 @@ describe('User Routes', () => {
     test('Doit refuser la désactivation sans mot de passe', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -447,12 +411,10 @@ describe('User Routes', () => {
     test('Doit permettre à un utilisateur de récupérer ses favoris', async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const res = await request(app)
@@ -464,26 +426,24 @@ describe('User Routes', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
     });
 
-    test('Doit refuser l\'accès sans authentification', async () => {
+    test("Doit refuser l'accès sans authentification", async () => {
       const res = await request(app).get('/api/users/favorites');
       expectErrorResponse(res, 401);
     });
   });
 
   describe('POST /api/users/favorites/toggle', () => {
-    test('Doit permettre à un utilisateur d\'ajouter/retirer un favori', async () => {
+    test("Doit permettre à un utilisateur d'ajouter/retirer un favori", async () => {
       // Créer un utilisateur et se connecter
       const user = await createTestUser();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: user.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: user.email,
+        password: 'password123',
+      });
       const userToken = loginRes.body.accessToken;
 
       const toggleData = {
-        mediaId: '507f1f77bcf86cd799439011'
+        mediaId: '507f1f77bcf86cd799439011',
       };
 
       const res = await request(app)
@@ -494,9 +454,9 @@ describe('User Routes', () => {
       expectSuccessResponse(res);
     });
 
-    test('Doit refuser l\'accès sans authentification', async () => {
+    test("Doit refuser l'accès sans authentification", async () => {
       const toggleData = {
-        mediaId: '507f1f77bcf86cd799439011'
+        mediaId: '507f1f77bcf86cd799439011',
       };
 
       const res = await request(app)
@@ -511,12 +471,10 @@ describe('User Routes', () => {
     test('Doit gérer les erreurs de validation complexes', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur de test
@@ -528,7 +486,7 @@ describe('User Routes', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'A'.repeat(200),
-          email: 'test@example.com'
+          email: 'test@example.com',
         });
 
       // Le nom long est accepté par MongoDB, donc on attend un succès
@@ -538,12 +496,10 @@ describe('User Routes', () => {
     test('Doit gérer les erreurs de rôle invalide', async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur de test
@@ -554,21 +510,19 @@ describe('User Routes', () => {
         .put(`/api/users/${testUser._id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          role: 'invalid-role'
+          role: 'invalid-role',
         });
 
       expectErrorResponse(res, 400);
     });
 
-    test('Doit gérer les erreurs de désactivation d\'utilisateur déjà désactivé', async () => {
+    test("Doit gérer les erreurs de désactivation d'utilisateur déjà désactivé", async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur de test et le désactiver
@@ -584,15 +538,13 @@ describe('User Routes', () => {
       expectErrorResponse(res, 400);
     });
 
-    test('Doit gérer les erreurs de réactivation d\'utilisateur déjà actif', async () => {
+    test("Doit gérer les erreurs de réactivation d'utilisateur déjà actif", async () => {
       // Créer un admin et se connecter
       const adminUser = await createTestAdmin();
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: adminUser.email,
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: adminUser.email,
+        password: 'password123',
+      });
       const adminToken = loginRes.body.accessToken;
 
       // Créer un utilisateur de test (actif par défaut)

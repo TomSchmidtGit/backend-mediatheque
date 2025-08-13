@@ -1,8 +1,13 @@
 import express from 'express';
 import { paginate } from '../middlewares/pagination.js';
 import {
-    createMedia, getAllMedia, getMediaById, updateMedia, deleteMedia,
-    addReview, updateReview
+  createMedia,
+  getAllMedia,
+  getMediaById,
+  updateMedia,
+  deleteMedia,
+  addReview,
+  updateReview,
 } from '../controllers/mediaController.js';
 import { protect, authorizeRoles } from '../middlewares/authMiddleware.js';
 import upload from '../config/multer.js';
@@ -63,11 +68,11 @@ const router = express.Router();
  *         description: Non autorisé. Nécessite un token.
  */
 router.post(
-    '/',
-    protect,
-    authorizeRoles('admin'),
-    upload.single('image'),
-    createMedia
+  '/',
+  protect,
+  authorizeRoles('admin'),
+  upload.single('image'),
+  createMedia
 );
 
 /**
@@ -205,7 +210,13 @@ router.get('/:id', getMediaById);
  *       404:
  *         description: Média non trouvé.
  */
-router.put('/:id', protect, authorizeRoles('admin'), upload.single('image'), updateMedia);
+router.put(
+  '/:id',
+  protect,
+  authorizeRoles('admin'),
+  upload.single('image'),
+  updateMedia
+);
 
 /**
  * @swagger
@@ -307,13 +318,15 @@ router.post('/:id/reviews', protect, addReview);
 router.put('/:id/reviews', protect, updateReview);
 
 router.post('/test-upload', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res
+      .status(400)
+      .json({ message: "L'image n'a pas été reçue par multer" });
+  }
 
-
-    if (!req.file) {
-        return res.status(400).json({ message: "L'image n'a pas été reçue par multer" });
-    }
-
-    res.status(200).json({ message: "Image reçue avec succès", imageUrl: req.file.path });
+  res
+    .status(200)
+    .json({ message: 'Image reçue avec succès', imageUrl: req.file.path });
 });
 
 export default router;

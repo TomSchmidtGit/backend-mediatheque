@@ -1,7 +1,12 @@
 // utils/mailTemplates/contactConfirmationTemplate.js
-export const contactConfirmationTemplate = ({ name, subject, message, timestamp }) => ({
-    subject: '✅ Confirmation de réception de votre message',
-    text: `Bonjour ${name},
+export const contactConfirmationTemplate = ({
+  name,
+  subject,
+  message,
+  timestamp,
+}) => ({
+  subject: '✅ Confirmation de réception de votre message',
+  text: `Bonjour ${name},
 
 Nous avons bien reçu votre message et vous en remercions.
 
@@ -23,7 +28,7 @@ L'équipe de la Médiathèque
 ---
 Ceci est un message automatique, merci de ne pas y répondre.`,
 
-    html: `
+  html: `
 <!DOCTYPE html>
 <html>
 <head>
@@ -46,10 +51,10 @@ Ceci est un message automatique, merci de ne pas y répondre.`,
             <h2>Message bien reçu !</h2>
             <p>Merci pour votre message, ${name}</p>
         </div>
-        
+
         <div class="content">
             <p>Nous avons bien reçu votre message et vous en remercions.</p>
-            
+
             <div class="message-recap">
                 <h3>📋 Récapitulatif de votre message</h3>
                 <p><strong>Sujet :</strong> ${subject}</p>
@@ -57,23 +62,23 @@ Ceci est un message automatique, merci de ne pas y répondre.`,
                 <p><strong>Message :</strong></p>
                 <p style="white-space: pre-wrap; font-style: italic; background-color: #f8f8f8; padding: 10px; border-radius: 3px;">${message}</p>
             </div>
-            
+
             <div class="next-steps">
                 <h3>⏭️ Suite à donner</h3>
                 <p>Notre équipe va examiner votre demande et vous répondra dans les <strong>plus brefs délais</strong>, généralement sous <strong>48 heures ouvrables</strong>.</p>
                 <p>Si votre demande est urgente, n'hésitez pas à nous contacter directement par téléphone.</p>
             </div>
-            
+
             <p style="text-align: center; margin-top: 30px;">
                 <strong>Cordialement,<br>
                 L'équipe de la Médiathèque</strong>
             </p>
         </div>
-        
+
         <div class="footer">
             <p><em>Ceci est un message automatique, merci de ne pas y répondre directement à cette adresse.</em></p>
         </div>
     </div>
 </body>
-</html>`
+</html>`,
 });

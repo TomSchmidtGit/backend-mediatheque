@@ -1,7 +1,7 @@
 import transporter from '../../config/nodemailer.js';
 import welcomeTemplate from '../mailTemplates/welcomeTemplate.js';
 
-const sendWelcomeEmail = async (user) => {
+const sendWelcomeEmail = async user => {
   try {
     const { subject, text } = welcomeTemplate({ name: user.name });
 
@@ -9,13 +9,15 @@ const sendWelcomeEmail = async (user) => {
       from: `Médiathèque <${process.env.MAIL_USER}>`,
       to: user.email,
       subject,
-      text
+      text,
     };
 
     await transporter.sendMail(mailOptions);
-  
   } catch (error) {
-    console.error(`❌ Erreur envoi email bienvenue à ${user.email}:`, error.message);
+    console.error(
+      `❌ Erreur envoi email bienvenue à ${user.email}:`,
+      error.message
+    );
     throw error;
   }
 };

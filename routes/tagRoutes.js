@@ -1,9 +1,9 @@
 import express from 'express';
 import {
-    createTag,
-    getAllTags,
-    updateTag,
-    deleteTag
+  createTag,
+  getAllTags,
+  updateTag,
+  deleteTag,
 } from '../controllers/tagController.js';
 import { protect, adminOnly } from '../middlewares/authMiddleware.js';
 

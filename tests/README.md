@@ -73,10 +73,10 @@ Ce fichier contient des fonctions utilitaires pour faciliter l'écriture des tes
 ### Exemple d'utilisation
 
 ```javascript
-import { 
-  createAndLoginUser, 
+import {
+  createAndLoginUser,
   createTestMediaData,
-  expectSuccessResponse 
+  expectSuccessResponse,
 } from './utils/testHelpers.js';
 
 describe('Media Tests', () => {
@@ -100,40 +100,47 @@ describe('Media Tests', () => {
 ### Routes Testées
 
 1. **Authentification** (`/api/auth`)
+
    - Inscription, connexion, déconnexion
    - Rafraîchissement de tokens
    - Réinitialisation de mot de passe
    - Validation des données
 
 2. **Utilisateurs** (`/api/users`)
+
    - CRUD complet des utilisateurs
    - Gestion des rôles et permissions
    - Profils utilisateur
    - Validation des données
 
 3. **Médias** (`/api/media`)
+
    - CRUD complet des médias
    - Upload d'images
    - Filtrage et recherche
    - Gestion des catégories et tags
 
 4. **Emprunts** (`/api/borrow`)
+
    - Création et gestion des emprunts
    - Retours et prolongations
    - Statistiques et rapports
    - Validation des dates
 
 5. **Catégories** (`/api/categories`)
+
    - CRUD complet des catégories
    - Génération automatique de slugs
    - Gestion des médias associés
 
 6. **Tags** (`/api/tags`)
+
    - CRUD complet des tags
    - Génération automatique de slugs
    - Recherche et filtrage
 
 7. **Dashboard** (`/api/dashboard`)
+
    - Statistiques globales
    - Activité récente
    - Emprunts en retard
@@ -181,6 +188,7 @@ describe('Media Tests', () => {
 ### Environnement
 
 Les tests s'exécutent dans un environnement isolé avec :
+
 - Base de données MongoDB en mémoire
 - Variables d'environnement de test
 - Logs supprimés pour la clarté
@@ -188,6 +196,7 @@ Les tests s'exécutent dans un environnement isolé avec :
 ### Isolation
 
 Chaque test :
+
 - Crée ses propres données de test
 - N'utilise pas de données persistantes
 - Se nettoie automatiquement après exécution
@@ -222,6 +231,7 @@ Chaque test :
 ## Couverture de Code
 
 La suite de tests vise une couverture de 80% minimum sur :
+
 - Contrôleurs
 - Middlewares
 - Modèles
@@ -235,6 +245,7 @@ npm run test:coverage
 ```
 
 Le rapport sera généré dans le dossier `coverage/` avec :
+
 - Couverture par ligne
 - Couverture par fonction
 - Couverture par branche
@@ -249,6 +260,7 @@ npm run test:ci
 ```
 
 Ce script :
+
 - Exécute tous les tests
 - Génère un rapport de couverture
 - Vérifie les seuils de couverture
@@ -257,6 +269,7 @@ Ce script :
 ### Pipeline CI/CD
 
 Les tests peuvent être intégrés dans un pipeline CI/CD :
+
 - Exécution automatique sur chaque commit
 - Vérification de la couverture de code
 - Blocage du déploiement si les tests échouent

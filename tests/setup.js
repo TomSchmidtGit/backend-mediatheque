@@ -6,11 +6,11 @@ let mongoServer;
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
-  
+
   if (mongoose.connection.readyState === 0) {
     await mongoose.connect(mongoUri);
   }
-  
+
   mongoose.set('debug', false);
 });
 
@@ -20,7 +20,7 @@ afterEach(async () => {
     const collection = collections[key];
     await collection.deleteMany();
   }
-  
+
   await new Promise(resolve => setTimeout(resolve, 100));
 });
 

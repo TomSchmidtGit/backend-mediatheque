@@ -3,19 +3,18 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from './cloudinary.js';
 
 const storage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-        folder: 'mediatheque',
-        allowed_formats: ['jpg', 'png', 'jpeg']
-    },
+  cloudinary,
+  params: {
+    folder: 'mediatheque',
+    allowed_formats: ['jpg', 'png', 'jpeg'],
+  },
 });
 
 const upload = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
-      
-        cb(null, true);
-    }
+  storage,
+  fileFilter: (req, file, cb) => {
+    cb(null, true);
+  },
 });
 
 export default upload;
