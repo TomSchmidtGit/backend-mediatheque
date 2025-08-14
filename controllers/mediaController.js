@@ -33,6 +33,61 @@ export const createMedia = async (req, res) => {
   }
 };
 
+// Ajouter un média à partir de données externes
+export const createMediaFromExternal = async (req, res) => {
+  try {
+    const {
+      title,
+      type,
+      author,
+      year,
+      description,
+      category,
+      tags,
+      externalData,
+    } = req.body;
+
+    if (!title || !type || !author || !year) {
+      return res.status(400).json({
+        message: 'Titre, type, auteur et année sont obligatoires',
+      });
+    }
+
+    // Vérifier si le média existe déjà (par ID externe)
+    if (externalData?.externalId && externalData?.source) {
+      const existingMedia = await Media.findOne({
+        'externalData.source': externalData.source,
+        'externalData.externalId': externalData.externalId,
+      });
+
+      if (existingMedia) {
+        return res.status(409).json({
+          message: 'Ce média existe déjà dans la base de données',
+          existingMedia,
+        });
+      }
+    }
+
+    const media = new Media({
+      title,
+      type,
+      author,
+      year: parseInt(year, 10),
+      description: description || '',
+      imageUrl: externalData?.imageUrl || null,
+      category: category || null,
+      tags: Array.isArray(tags) ? tags : [],
+      externalData: externalData || null,
+    });
+
+    const savedMedia = await media.save();
+    res.status(201).json(savedMedia);
+  } catch (error) {
+    console.error('Erreur lors de la création du média externe:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Récupérer tous les médias
 export const getAllMedia = async (req, res) => {
   try {
@@ -71,7 +126,7 @@ export const getAllMedia = async (req, res) => {
 
     const mediaList = await Media.find(query)
       .select(
-        'title type year author imageUrl averageRating category tags available'
+        'title type year author description imageUrl averageRating category tags available'
       )
       .skip(skip)
       .limit(limit)

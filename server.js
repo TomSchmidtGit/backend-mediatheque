@@ -20,6 +20,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import tagRoutes from './routes/tagRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
+import externalApiRoutes from './routes/externalApiRoutes.js';
 
 import { scheduleBorrowReminders } from './utils/borrowReminder.js';
 
@@ -95,6 +96,7 @@ app.use('/api/categories', checkDBConnection, categoryRoutes);
 app.use('/api/tags', checkDBConnection, tagRoutes);
 app.use('/api/dashboard', checkDBConnection, dashboardRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/external', checkDBConnection, externalApiRoutes);
 
 // Initialisation de Swagger
 swaggerDocs(app);
