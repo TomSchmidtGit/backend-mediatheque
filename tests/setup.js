@@ -3,15 +3,15 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 
 let mongoServer;
 
+// Configuration pour les tests
+process.env.NODE_ENV = 'test';
+process.env.JWT_SECRET = 'test-secret-key';
+process.env.DISABLE_EXTERNAL_APIS = 'true'; // Désactiver les APIs externes
+
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
-
-  if (mongoose.connection.readyState === 0) {
-    await mongoose.connect(mongoUri);
-  }
-
-  mongoose.set('debug', false);
+  await mongoose.connect(mongoUri);
 });
 
 afterEach(async () => {
@@ -25,17 +25,6 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.disconnect();
-  }
-  if (mongoServer) {
-    await mongoServer.stop();
-  }
+  await mongoose.disconnect();
+  await mongoServer.stop();
 });
-
-process.env.JWT_SECRET = 'test-secret-key';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key';
-process.env.NODE_ENV = 'test';
-process.env.PORT = '5002';
-process.env.MONGO_URI = 'mongodb://localhost:27017/test';
-process.env.LOG_LEVEL = 'error';

@@ -2,6 +2,7 @@ import express from 'express';
 import { paginate } from '../middlewares/pagination.js';
 import {
   createMedia,
+  createMediaFromExternal,
   getAllMedia,
   getMediaById,
   updateMedia,
@@ -73,6 +74,82 @@ router.post(
   authorizeRoles('admin'),
   upload.single('image'),
   createMedia
+);
+
+/**
+ * @swagger
+ * /api/media/external:
+ *   post:
+ *     summary: Ajouter un média à partir de données externes
+ *     description: Cette route permet d'ajouter un média en utilisant les données des APIs externes (Google Books, TMDB, MusicBrainz).
+ *     tags: [Médias]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Le Seigneur des Anneaux"
+ *               type:
+ *                 type: string
+ *                 enum: ["book", "movie", "music", "tv"]
+ *                 example: "book"
+ *               author:
+ *                 type: string
+ *                 example: "J.R.R. Tolkien"
+ *               year:
+ *                 type: integer
+ *                 example: 1954
+ *               description:
+ *                 type: string
+ *                 example: "Un roman de fantasy épique"
+ *               category:
+ *                 type: string
+ *                 description: ID de la catégorie (facultatif)
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Liste d'IDs de tags (facultatif)
+ *               externalData:
+ *                 type: object
+ *                 description: Données provenant de l'API externe
+ *                 properties:
+ *                   source:
+ *                     type: string
+ *                     enum: ["google_books", "tmdb", "musicbrainz"]
+ *                   externalId:
+ *                     type: string
+ *                   imageUrl:
+ *                     type: string
+ *                   isbn:
+ *                     type: string
+ *                   publisher:
+ *                     type: string
+ *                   genres:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *     responses:
+ *       201:
+ *         description: Média ajouté avec succès.
+ *       400:
+ *         description: Erreur de validation des champs.
+ *       409:
+ *         description: Le média existe déjà dans la base de données.
+ *       401:
+ *         description: Non autorisé. Nécessite un token.
+ */
+router.post(
+  '/external',
+  protect,
+  authorizeRoles('admin'),
+  createMediaFromExternal
 );
 
 /**
