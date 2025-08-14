@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import mongoose from 'mongoose';
 
 import connectDB from './config/db.js';
 import {
@@ -71,7 +72,6 @@ const checkDBConnection = (req, res, next) => {
     return next();
   }
 
-  const mongoose = require('mongoose');
   if (mongoose.connection.readyState === 1) {
     next();
   } else {
@@ -101,13 +101,32 @@ swaggerDocs(app);
 
 // Route de test pour vérifier que l'API tourne
 app.get('/api/health', (req, res) => {
-  const mongoose = require('mongoose');
-  const dbStatus =
-    mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  try {
+    const dbStatus =
+      mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    res.status(200).json({
+      message: 'API is running',
+      database: dbStatus,
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  } catch (error) {
+    console.error('Erreur dans /api/health:', error);
+    res.status(200).json({
+      message: 'API is running',
+      database: 'unknown',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  }
+});
+
+// Endpoint de santé simple pour Railway (health check)
+app.get('/health', (req, res) => {
   res.status(200).json({
-    message: 'API is running',
-    database: dbStatus,
+    status: 'ok',
     timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
   });
 });
 
@@ -148,12 +167,11 @@ const startServer = async () => {
   }
 };
 
-// Démarrage du serveur
-let serverInstance;
+// Démarrage automatique du serveur (sauf en mode test)
 if (process.env.NODE_ENV !== 'test') {
   startServer()
     .then(({ app, server }) => {
-      serverInstance = server;
+      console.log('✅ Application démarrée avec succès');
     })
     .catch(error => {
       console.error('❌ Échec du démarrage du serveur:', error);
@@ -161,4 +179,4 @@ if (process.env.NODE_ENV !== 'test') {
     });
 }
 
-export { app, serverInstance as server }; // Exportation pour les tests
+export { app, startServer }; // Exportation pour les tests
