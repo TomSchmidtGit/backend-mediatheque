@@ -3,15 +3,16 @@ import dayjs from 'dayjs';
 import { sendDueSoonReminder } from './sendMails/sendDueSoonReminder.js';
 import { sendLateReminder } from './sendMails/sendLateReminder.js';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import '../models/User.js';
 import '../models/Media.js';
 
-dotenv.config();
-
 export const checkDueBorrows = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    // Vérifier que la connexion MongoDB est active
+    if (mongoose.connection.readyState !== 1) {
+      console.log('⚠️ Connexion MongoDB non disponible, tâche cron ignorée');
+      return;
+    }
 
     const now = dayjs();
     const inTwoDays = now.add(2, 'day').startOf('day');
@@ -35,9 +36,8 @@ export const checkDueBorrows = async () => {
       }
     }
 
-    await mongoose.disconnect();
+    console.log('✅ Vérification des emprunts terminée avec succès');
   } catch (error) {
     console.error('❌ Erreur dans checkDueBorrows :', error.message);
-    await mongoose.disconnect();
   }
 };
