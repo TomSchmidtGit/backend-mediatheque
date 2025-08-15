@@ -1,8 +1,10 @@
 import mongoose from 'mongoose';
 
 const connectDB = async () => {
+  let mongoURI;
+  let options;
+
   try {
-    let mongoURI;
     if (process.env.NODE_ENV === 'production') {
       mongoURI = process.env.MONGO_URI_PROD || process.env.MONGO_URI;
     } else {
@@ -18,9 +20,7 @@ const connectDB = async () => {
     console.log(`🔗 Environnement: ${process.env.NODE_ENV || 'development'}`);
 
     // Options de connexion robustes pour Railway
-    const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    options = {
       serverSelectionTimeoutMS: 30000, // 30 secondes pour la sélection du serveur
       socketTimeoutMS: 45000, // 45 secondes pour les opérations socket
       connectTimeoutMS: 30000, // 30 secondes pour la connexion initiale
@@ -31,11 +31,12 @@ const connectDB = async () => {
       retryReads: true,
       w: 'majority', // Écriture majoritaire pour la cohérence
       // Options de reconnexion automatique
-      autoReconnect: true,
-      reconnectTries: Number.MAX_VALUE, // Tentatives infinies de reconnexion
-      reconnectInterval: 1000, // Intervalle de 1 seconde entre les tentatives
-      keepAlive: true, // Maintenir la connexion active
-      keepAliveInitialDelay: 300000, // 5 minutes
+      heartbeatFrequencyMS: 10000, // Fréquence des heartbeats (10 secondes)
+      serverApi: {
+        version: '1',
+        strict: false,
+        deprecationErrors: false,
+      },
     };
 
     await mongoose.connect(mongoURI, options);
@@ -66,7 +67,8 @@ const connectDB = async () => {
           console.log(
             '⚠️ Connexion MongoDB perdue, tentative de reconnexion...'
           );
-          mongoose.connect(mongoURI, options).catch(err => {
+          // Utiliser la méthode de reconnexion native de Mongoose
+          mongoose.connection.openUri(mongoURI, options).catch(err => {
             console.error(
               '❌ Échec de la reconnexion automatique:',
               err.message
@@ -106,7 +108,15 @@ const connectDB = async () => {
     if (process.env.NODE_ENV === 'production') {
       console.log('🔄 Tentative de reconnexion dans 5 secondes...');
       setTimeout(() => {
-        connectDB();
+        if (mongoose.connection.readyState !== 1) {
+          // Utiliser la méthode de reconnexion native de Mongoose
+          mongoose.connection.openUri(mongoURI, options).catch(err => {
+            console.error(
+              '❌ Échec de la reconnexion automatique:',
+              err.message
+            );
+          });
+        }
       }, 5000);
     } else {
       process.exit(1);
