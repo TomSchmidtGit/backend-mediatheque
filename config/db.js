@@ -30,6 +30,12 @@ const connectDB = async () => {
       retryWrites: true,
       retryReads: true,
       w: 'majority', // Écriture majoritaire pour la cohérence
+      // Options de reconnexion automatique
+      autoReconnect: true,
+      reconnectTries: Number.MAX_VALUE, // Tentatives infinies de reconnexion
+      reconnectInterval: 1000, // Intervalle de 1 seconde entre les tentatives
+      keepAlive: true, // Maintenir la connexion active
+      keepAliveInitialDelay: 300000, // 5 minutes
     };
 
     await mongoose.connect(mongoURI, options);
@@ -46,7 +52,30 @@ const connectDB = async () => {
 
     mongoose.connection.on('disconnected', () => {
       console.log('🟡 Mongoose disconnected from MongoDB');
+      console.log('🔄 Tentative de reconnexion automatique...');
     });
+
+    mongoose.connection.on('reconnected', () => {
+      console.log('🟢 Mongoose reconnected to MongoDB');
+    });
+
+    // Vérification périodique de la connexion (toutes les 5 minutes)
+    setInterval(
+      () => {
+        if (mongoose.connection.readyState !== 1) {
+          console.log(
+            '⚠️ Connexion MongoDB perdue, tentative de reconnexion...'
+          );
+          mongoose.connect(mongoURI, options).catch(err => {
+            console.error(
+              '❌ Échec de la reconnexion automatique:',
+              err.message
+            );
+          });
+        }
+      },
+      5 * 60 * 1000
+    ); // 5 minutes
 
     // Gestion de la fermeture gracieuse
     process.on('SIGINT', async () => {
