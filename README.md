@@ -438,6 +438,20 @@ export default {
 
 ## 📦 Déploiement
 
+### Environnements
+
+| Environnement     | URL                                 | Commande           | Variables          |
+| ----------------- | ----------------------------------- | ------------------ | ------------------ |
+| **Développement** | `http://localhost:5001`             | `npm run dev`      | `.env`             |
+| **Staging**       | `http://localhost:5001` (dev local) | `npm run dev`      | Variables locales  |
+| **Production**    | Railway production                  | Auto (push `main`) | Railway production |
+
+### Documentation CI/CD
+
+📚 **Protocole d'intégration et déploiement** : [Documentation CI/CD](./docs/ci-cd.md)
+
+📋 **Historique des versions** : [Changelog](./CHANGELOG.md)
+
 ### Déploiement avec Docker
 
 #### 1. Build de l'image
@@ -607,7 +621,17 @@ npm start
 
 ### Documentation Swagger
 
-L'API est documentée avec Swagger et accessible sur `/api-docs` en développement.
+L'API est documentée avec Swagger et accessible sur :
+
+- **Développement local** : `http://localhost:5001/api/docs`
+- **Staging** : `http://localhost:5001/api/docs` (dev local)
+- **Production** : `https://backend-mediatheque-production.up.railway.app/api/docs`
+
+#### Capture d'écran Swagger
+
+![Swagger API Documentation](docs/preuves/swagger-api-docs.png)
+
+_Documentation interactive de l'API avec exemples de requêtes et réponses_
 
 ### Routes principales
 
@@ -899,7 +923,7 @@ export const scheduleBorrowReminders = () => {
 
 - **ESLint** : Règles de qualité du code
 - **Prettier** : Formatage automatique
-- **Jest** : Tests avec couverture minimale de 80%
+- **Jest** : Suite de tests complète
 - **Pre-commit hooks** : Vérification automatique
 
 ### Hooks pre-commit
@@ -951,7 +975,6 @@ npm run health-check
 ```bash
 # Vérifier les variables d'environnement
 echo $JWT_SECRET
-echo $JWT_REFRESH_SECRET
 
 # Régénérer les secrets si nécessaire
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"

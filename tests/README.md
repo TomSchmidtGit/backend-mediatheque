@@ -36,7 +36,7 @@ La configuration Jest se trouve dans `package.json` et inclut :
 
 - Base de données en mémoire pour l'isolation des tests
 - Nettoyage automatique entre les tests
-- Seuils de couverture de code (80%)
+- Tests automatisés complets
 - Timeout de 30 secondes par test
 - Mode verbose activé
 
@@ -230,7 +230,7 @@ Chaque test :
 
 ## Couverture de Code
 
-La suite de tests vise une couverture de 80% minimum sur :
+La suite de tests couvre les fonctionnalités principales :
 
 - Contrôleurs
 - Middlewares
@@ -263,7 +263,7 @@ Ce script :
 
 - Exécute tous les tests
 - Génère un rapport de couverture
-- Vérifie les seuils de couverture
+- Génère un rapport de couverture
 - Se termine avec un code d'erreur si les tests échouent
 
 ### Pipeline CI/CD
